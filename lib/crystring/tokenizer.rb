@@ -7,6 +7,9 @@ module Crystring
       SEMICOLON = 4
       IDENTIFIER = 5
       ASSIGN = 6
+      KEYWORD_DEF = 7
+      OPENING_CURLY = 8
+      CLOSING_CURLY = 9
 
       attr_reader :type
       attr_reader :value
@@ -33,6 +36,11 @@ module Crystring
           literal << @char
           next_char
         end
+
+        if literal == "def"
+          return Token.new(Token::KEYWORD_DEF, literal)
+        end
+
         return Token.new(Token::IDENTIFIER, literal)
       elsif @char == '('
         next_char
@@ -40,6 +48,12 @@ module Crystring
       elsif @char == ')'
         next_char
         return Token.new(Token::CLOSING_PAREN, ')')
+      elsif @char == '{'
+        next_char
+        return Token.new(Token::OPENING_CURLY, '{')
+      elsif @char == '}'
+        next_char
+        return Token.new(Token::CLOSING_CURLY, '}')
       elsif @char == ';'
         next_char
         return Token.new(Token::SEMICOLON, ';')

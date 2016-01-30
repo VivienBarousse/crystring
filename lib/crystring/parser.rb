@@ -1,16 +1,32 @@
 module Crystring
   class Parser
+
+    class Statement
+      def initialize(&block)
+        @block = block
+      end
+
+      def invoke
+        @block.call
+      end
+    end
+
     attr_reader :variables
 
     def initialize(tokenizer)
       @tokenizer = tokenizer
       @variables = {}
+      @functions = {}
       next_token
     end
 
     def parse
       while @token
-        parse_statement
+        if @token.type == Tokenizer::Token::IDENTIFIER
+          parse_statement.invoke
+        elsif @token.type == Tokenizer::Token::KEYWORD_DEF
+          parse_function
+        end
       end
     end
 
@@ -38,10 +54,14 @@ module Crystring
         raise "Invalid token #{@token.value}, expected \";\"" unless @token.type == Tokenizer::Token::SEMICOLON
         next_token
 
-        if method_name == "puts"
-          puts param
-        else
-          raise "Unknown method #{method_name}"
+        return Statement.new do
+          if method_name == "puts"
+            puts param
+          elsif @functions.has_key?(method_name)
+            @functions[method_name].each(&:invoke)
+          else
+            raise "Unknown method #{method_name}"
+          end
         end
       elsif @token.type == Tokenizer::Token::ASSIGN
         raise "Invalid token #{@token.value}, expected \"=\"" unless @token.type == Tokenizer::Token::ASSIGN
@@ -51,8 +71,39 @@ module Crystring
         next_token
         raise "Invalid token #{@token.value}, expected \";\"" unless @token.type == Tokenizer::Token::SEMICOLON
         next_token
-        variables[method_name] = param
+
+        return Statement.new do
+          variables[method_name] = param
+        end
       end
+    end
+
+    def parse_function
+      raise "Invalid token #{@token.type}, expected \"def\"" unless @token.type == Tokenizer::Token::KEYWORD_DEF
+      next_token
+
+      method_name = @token.value
+      raise "Invalid token #{@token.type}, expected identifier" unless @token.type == Tokenizer::Token::IDENTIFIER
+      next_token
+
+      raise "Invalid token #{@token.value}, expected \"(\"" unless @token.type == Tokenizer::Token::OPENING_PAREN
+      next_token
+
+      raise "Invalid token #{@token.value}, expected \")\"" unless @token.type == Tokenizer::Token::CLOSING_PAREN
+      next_token
+
+      raise "Invalid token #{@token.value}, expected \"{\"" unless @token.type == Tokenizer::Token::OPENING_CURLY
+      next_token
+
+      statements = []
+      while @token.type != Tokenizer::Token::CLOSING_CURLY
+        statements << parse_statement
+      end
+
+      @functions[method_name] = statements
+
+      raise "Invalid token #{@token.value}, expected \"}\"" unless @token.type == Tokenizer::Token::CLOSING_CURLY
+      next_token
     end
 
     private

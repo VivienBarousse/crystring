@@ -1,0 +1,8 @@
+
+def hello() {
+  puts("Hello world!");
+}
+
+hello();
+hello();
+
