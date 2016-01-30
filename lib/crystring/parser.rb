@@ -21,6 +21,8 @@ module Crystring
       next_token
       raise "Invalid token #{@token}, expected \")\"" unless @token == ")"
       next_token
+      raise "Invalid token #{@token}, expected \";\"" unless @token == ";"
+      next_token
 
       if method_name == "puts"
         puts param

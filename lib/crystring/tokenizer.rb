@@ -6,11 +6,11 @@ module Crystring
     end
 
     def next_token
-      while @char <= ' '
+      while @char && @char <= ' '
         next_char
       end
 
-      if @char >= 'a' && @char <= 'z'
+      if @char && @char >= 'a' && @char <= 'z'
         literal = ""
         while @char >= 'a' && @char <= 'z'
           literal << @char
@@ -23,6 +23,9 @@ module Crystring
       elsif @char == ')'
         next_char
         return ')'
+      elsif @char == ';'
+        next_char
+        return ';'
       elsif @char == '"'
         str = ""
         next_char
