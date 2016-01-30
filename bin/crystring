@@ -3,7 +3,7 @@
 $:.push(File.expand_path('../../lib/', __FILE__))
 require 'crystring'
 
-file = File.open("examples/hello_world.str")
+file = File.open(ARGV[0])
 tokenizer = Crystring::Tokenizer.new(file)
 parser = Crystring::Parser.new(tokenizer)
 parser.parse
