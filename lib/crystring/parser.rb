@@ -40,13 +40,12 @@ module Crystring
         raise "Invalid token #{@token.value}, expected \"(\"" unless @token.type == Tokenizer::Token::OPENING_PAREN
         next_token
         if @token.type == Tokenizer::Token::STRING_LITERAL
-          param = @token.value
+          value_token = @token
           raise "Invalid token #{@token.type}, expected string literal" unless @token.type == Tokenizer::Token::STRING_LITERAL
           next_token
         elsif @token.type == Tokenizer::Token::IDENTIFIER
           raise "Invalid token #{@token.type}, expected identifier" unless @token.type == Tokenizer::Token::IDENTIFIER
-          raise "Unknown variable \"#{@token.value}\"" unless variables.has_key?(@token.value)
-          param = variables[@token.value]
+          value_token = @token
           next_token
         end
         raise "Invalid token #{@token.value}, expected \")\"" unless @token.type == Tokenizer::Token::CLOSING_PAREN
@@ -56,6 +55,12 @@ module Crystring
 
         return Statement.new do
           if method_name == "puts"
+            if value_token.type == Tokenizer::Token::STRING_LITERAL
+              param = value_token.value
+            elsif value_token.type == Tokenizer::Token::IDENTIFIER
+              raise "Unknown variable '#{value_token.value}'" unless @variables.has_key?(value_token.value)
+              param = variables[value_token.value]
+            end
             puts param
           elsif @functions.has_key?(method_name)
             @functions[method_name].each(&:invoke)
