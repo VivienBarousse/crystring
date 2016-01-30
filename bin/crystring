@@ -1,0 +1,91 @@
+#!/usr/bin/env ruby
+
+module Crystring
+  class Tokenizer
+    def initialize(input)
+      @input = input
+      next_char
+    end
+
+    def next_token
+      while @char <= ' '
+        next_char
+      end
+
+      if @char >= 'a' && @char <= 'z'
+        literal = ""
+        while @char >= 'a' && @char <= 'z'
+          literal << @char
+          next_char
+        end
+        return literal
+      elsif @char == '('
+        next_char
+        return '('
+      elsif @char == ')'
+        next_char
+        return ')'
+      elsif @char == '"'
+        str = ""
+        next_char
+        while @char != '"'
+          str << @char
+          next_char
+        end
+        next_char
+        return "#{str}"
+      end
+    end
+
+    private
+
+    def next_char
+      @char = @input.readchar
+    rescue EOFError
+      @char = nil
+    end
+  end
+
+  class Parser
+    def initialize(tokenizer)
+      @tokenizer = tokenizer
+      next_token
+    end
+
+    def parse
+      while @token
+        parse_statement
+      end
+    end
+
+    # identifier, "(", value, ")"
+    def parse_statement
+      method_name = @token
+      next_token
+      raise "Invalid token #{@token}, expected \"(\"" unless @token == "("
+      next_token
+      param = @token
+      next_token
+      raise "Invalid token #{@token}, expected \")\"" unless @token == ")"
+      next_token
+
+      if method_name == "puts"
+        puts param
+      else
+        raise "Unknown method #{method_name}"
+      end
+    end
+
+    private
+
+    def next_token
+      @token = @tokenizer.next_token
+    end
+  end
+end
+
+file = File.open("examples/hello_world.str")
+tokenizer = Crystring::Tokenizer.new(file)
+parser = Crystring::Parser.new(tokenizer)
+parser.parse
+
