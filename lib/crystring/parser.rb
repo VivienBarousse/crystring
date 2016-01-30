@@ -11,8 +11,6 @@ module Crystring
       end
     end
 
-    attr_reader :variables
-
     def initialize(tokenizer)
       @tokenizer = tokenizer
       @variables = {}
@@ -58,8 +56,8 @@ module Crystring
             if value_token.type == Tokenizer::Token::STRING_LITERAL
               param = value_token.value
             elsif value_token.type == Tokenizer::Token::IDENTIFIER
-              raise "Unknown variable '#{value_token.value}'" unless @variables.has_key?(value_token.value)
-              param = variables[value_token.value]
+              raise "Unknown variable '#{value_token.value}'" unless variable_exists?(value_token.value)
+              param = get_variable(value_token.value)
             end
             puts param
           elsif @functions.has_key?(method_name)
@@ -78,7 +76,7 @@ module Crystring
         next_token
 
         return Statement.new do
-          variables[method_name] = param
+          set_variable(method_name, param)
         end
       end
     end
@@ -115,6 +113,18 @@ module Crystring
 
     def next_token
       @token = @tokenizer.next_token
+    end
+
+    def variable_exists?(name)
+      @variables.has_key?(name)
+    end
+
+    def get_variable(name)
+      @variables[name]
+    end
+
+    def set_variable(name, value)
+      @variables[name] = value
     end
   end
 end
