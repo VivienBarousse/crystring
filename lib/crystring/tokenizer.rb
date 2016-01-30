@@ -6,6 +6,7 @@ module Crystring
       CLOSING_PAREN = 3
       SEMICOLON = 4
       IDENTIFIER = 5
+      ASSIGN = 6
 
       attr_reader :type
       attr_reader :value
@@ -42,6 +43,9 @@ module Crystring
       elsif @char == ';'
         next_char
         return Token.new(Token::SEMICOLON, ';')
+      elsif @char == "="
+        next_char
+        return Token.new(Token::ASSIGN, '=')
       elsif @char == '"'
         str = ""
         next_char

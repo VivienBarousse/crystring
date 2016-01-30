@@ -8,4 +8,5 @@ def test_program(name, expected_output)
 end
 
 test_program("examples/hello_world.str", "Hello world!\n")
+test_program("examples/variables.str", "Hello world!\n")
 
