@@ -1,5 +1,21 @@
 module Crystring
   class Tokenizer
+    class Token
+      STRING_LITERAL = 1
+      OPENING_PAREN = 2
+      CLOSING_PAREN = 3
+      SEMICOLON = 4
+      IDENTIFIER = 5
+
+      attr_reader :type
+      attr_reader :value
+
+      def initialize(type, value)
+        @type = type
+        @value = value
+      end
+    end
+
     def initialize(input)
       @input = input
       next_char
@@ -16,16 +32,16 @@ module Crystring
           literal << @char
           next_char
         end
-        return literal
+        return Token.new(Token::IDENTIFIER, literal)
       elsif @char == '('
         next_char
-        return '('
+        return Token.new(Token::OPENING_PAREN, '(')
       elsif @char == ')'
         next_char
-        return ')'
+        return Token.new(Token::CLOSING_PAREN, ')')
       elsif @char == ';'
         next_char
-        return ';'
+        return Token.new(Token::SEMICOLON, ';')
       elsif @char == '"'
         str = ""
         next_char
@@ -34,7 +50,7 @@ module Crystring
           next_char
         end
         next_char
-        return "#{str}"
+        return Token.new(Token::STRING_LITERAL, str)
       end
     end
 

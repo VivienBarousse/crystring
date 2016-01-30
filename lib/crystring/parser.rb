@@ -13,15 +13,17 @@ module Crystring
 
     # identifier, "(", value, ")"
     def parse_statement
-      method_name = @token
+      method_name = @token.value
+      raise "Invalid token #{@token.type}, expected identifier" unless @token.type == Tokenizer::Token::IDENTIFIER
       next_token
-      raise "Invalid token #{@token}, expected \"(\"" unless @token == "("
+      raise "Invalid token #{@token.value}, expected \"(\"" unless @token.type == Tokenizer::Token::OPENING_PAREN
       next_token
-      param = @token
+      param = @token.value
+      raise "Invalid token #{@token.type}, expected string literal" unless @token.type == Tokenizer::Token::STRING_LITERAL
       next_token
-      raise "Invalid token #{@token}, expected \")\"" unless @token == ")"
+      raise "Invalid token #{@token.value}, expected \")\"" unless @token.type == Tokenizer::Token::CLOSING_PAREN
       next_token
-      raise "Invalid token #{@token}, expected \";\"" unless @token == ";"
+      raise "Invalid token #{@token.value}, expected \";\"" unless @token.type == Tokenizer::Token::SEMICOLON
       next_token
 
       if method_name == "puts"
