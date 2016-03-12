@@ -14,6 +14,7 @@ module Crystring
       NOT_EQUALS = 11
       KEYWORD_IF = 12
       KEYWORD_ELSE = 13
+      COMMA = 14
 
       attr_reader :type
       attr_reader :value
@@ -70,6 +71,9 @@ module Crystring
       elsif @char == ';'
         next_char
         return Token.new(Token::SEMICOLON, ';')
+      elsif @char == ','
+        next_char
+        return Token.new(Token::COMMA, ',')
       elsif @char == "="
         next_char
         if @char == "="

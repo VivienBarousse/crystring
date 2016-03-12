@@ -92,9 +92,17 @@ module Crystring
       if @token.type == Tokenizer::Token::OPENING_PAREN
         raise "Invalid token #{@token.value}, expected \"(\"" unless @token.type == Tokenizer::Token::OPENING_PAREN
         next_token
-        unless @token.type == Tokenizer::Token::CLOSING_PAREN
-          value_expression = parse_expression
+
+        value_expressions = []
+        until @token.type == Tokenizer::Token::CLOSING_PAREN
+          value_expressions << parse_expression
+
+          unless @token.type == Tokenizer::Token::CLOSING_PAREN
+            raise "Invalid token #{@token.value}, expected \",\"" unless @token.type == Tokenizer::Token::COMMA
+            next_token
+          end
         end
+
         raise "Invalid token #{@token.value}, expected \")\"" unless @token.type == Tokenizer::Token::CLOSING_PAREN
         next_token
         raise "Invalid token #{@token.value}, expected \";\"" unless @token.type == Tokenizer::Token::SEMICOLON
@@ -102,11 +110,11 @@ module Crystring
 
         return Statement.new do
           if method_name == "puts"
-            param = value_expression.evaluate
+            param = value_expressions.first.evaluate
             puts param
           elsif @functions.has_key?(method_name)
-            param = value_expression && value_expression.evaluate
-            @functions[method_name].invoke(value_expression ? [param] : [])
+            params = value_expressions.map(&:evaluate)
+            @functions[method_name].invoke(params)
           else
             raise "Unknown method #{method_name}"
           end
@@ -187,9 +195,17 @@ module Crystring
       next_token
 
       formal_params = []
-      if @token.type == Tokenizer::Token::IDENTIFIER
+      while @token.type == Tokenizer::Token::IDENTIFIER
         formal_params << @token.value
         next_token
+
+        if @token.type == Tokenizer::Token::COMMA
+          next_token
+        elsif @token.type == Tokenizer::Token::CLOSING_PAREN
+          break
+        else
+          raise "Invalid token #{@token.value}, expected \")\" or \",\"" unless @token.type == Tokenizer::Token::CLOSING_PAREN
+        end
       end
 
       raise "Invalid token #{@token.value}, expected \")\"" unless @token.type == Tokenizer::Token::CLOSING_PAREN
