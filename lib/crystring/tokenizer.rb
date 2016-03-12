@@ -21,6 +21,11 @@ module Crystring
         @type = type
         @value = value
       end
+
+      def ==(other)
+        other.type == self.type &&
+          other.value == self.value
+      end
     end
 
     def initialize(input)
@@ -35,7 +40,7 @@ module Crystring
 
       if @char && @char >= 'a' && @char <= 'z'
         literal = ""
-        while @char >= 'a' && @char <= 'z'
+        while @char && @char >= 'a' && @char <= 'z'
           literal << @char
           next_char
         end
