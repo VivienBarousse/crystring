@@ -62,6 +62,13 @@ module Crystring
       @variables = {}
       @functions = {}
       @lookup_scopes = []
+
+      @functions["puts"] = Function.new(
+        @lookup_scopes,
+        ["value"],
+        [Statement.new { puts get_variable("value") }]
+      )
+
       next_token
     end
 
@@ -109,10 +116,7 @@ module Crystring
         next_token
 
         return Statement.new do
-          if method_name == "puts"
-            param = value_expressions.first.evaluate
-            puts param
-          elsif @functions.has_key?(method_name)
+          if @functions.has_key?(method_name)
             params = value_expressions.map(&:evaluate)
             @functions[method_name].invoke(params)
           else
