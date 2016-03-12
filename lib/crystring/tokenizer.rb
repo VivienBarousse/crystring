@@ -15,6 +15,8 @@ module Crystring
       KEYWORD_IF = 12
       KEYWORD_ELSE = 13
       COMMA = 14
+      PERIOD = 15
+      KEYWORD_CLASS = 16
 
       attr_reader :type
       attr_reader :value
@@ -40,9 +42,9 @@ module Crystring
         next_char
       end
 
-      if @char && @char >= 'a' && @char <= 'z'
+      if @char && (@char >= 'a' && @char <= 'z' || @char >= 'A' && @char <= 'Z')
         literal = ""
-        while @char && @char >= 'a' && @char <= 'z'
+        while @char && (@char >= 'a' && @char <= 'z' || @char >= 'A' && @char <= 'Z')
           literal << @char
           next_char
         end
@@ -53,6 +55,8 @@ module Crystring
           return Token.new(Token::KEYWORD_IF, literal)
         elsif literal == "else"
           return Token.new(Token::KEYWORD_ELSE, literal)
+        elsif literal == "class"
+          return Token.new(Token::KEYWORD_CLASS, literal)
         end
 
         return Token.new(Token::IDENTIFIER, literal)
@@ -74,6 +78,9 @@ module Crystring
       elsif @char == ','
         next_char
         return Token.new(Token::COMMA, ',')
+      elsif @char == '.'
+        next_char
+        return Token.new(Token::PERIOD, '.')
       elsif @char == "="
         next_char
         if @char == "="

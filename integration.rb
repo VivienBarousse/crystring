@@ -16,4 +16,5 @@ test_program("examples/else_statements.str", "Same value!\nSame value!\n")
 test_program("examples/functions_arguments.str", "Yes, hello\nNo, not hello\n")
 test_program("examples/local_scopes.str", "Hi\nHi\nHo\nHi\n")
 test_program("examples/functions_multiple_arguments.str", "Yes, hello\nNo, not hello\n")
+test_program("examples/method_call.str", "Hello world\n")
 

@@ -95,13 +95,40 @@ module Crystring
         if @token.type == Tokenizer::Token::IDENTIFIER
           parse_statement.invoke
         elsif @token.type == Tokenizer::Token::KEYWORD_DEF
-          parse_function
+          f = parse_function
+          @functions[f[0]] = f[1]
         elsif @token.type == Tokenizer::Token::KEYWORD_IF
           parse_if.invoke
+        elsif @token.type == Tokenizer::Token::KEYWORD_CLASS
+          parse_class
         else
           raise "Unexpected token `#{@token.value}`"
         end
       end
+    end
+
+    def parse_class
+      raise "Invalid token #{@token.type}, expected `class`" unless @token.type == Tokenizer::Token::KEYWORD_CLASS
+      next_token
+      type_name = @token.value
+      raise "Invalid token #{@token.type}, expected identifier" unless @token.type == Tokenizer::Token::IDENTIFIER
+      next_token
+      raise "Invalid token #{@token.type}, expected `{`" unless @token.type == Tokenizer::Token::OPENING_CURLY
+      next_token
+
+      if type_name == "String"
+        type = Types::String
+      else
+        raise "Unknown type `#{type_name}`"
+      end
+
+      while @token.type == Tokenizer::Token::KEYWORD_DEF
+        f = parse_function
+        type.def_method(f[0], f[1])
+      end
+
+      raise "Invalid token #{@token.type}, expected `}`" unless @token.type == Tokenizer::Token::CLOSING_CURLY
+      next_token
     end
 
     # identifier, "(", value, ")"
@@ -151,8 +178,40 @@ module Crystring
         return Statement.new do
           set_variable(function_name, param.evaluate)
         end
+      elsif @token.type == Tokenizer::Token::PERIOD
+        next_token
+        target_name = function_name
+
+        function_name = @token.value
+        raise "Invalid token #{@token.type}, expected identifier" unless @token.type == Tokenizer::Token::IDENTIFIER
+        next_token
+
+        raise "Invalid token #{@token.value}, expected \"(\"" unless @token.type == Tokenizer::Token::OPENING_PAREN
+        next_token
+
+        value_expressions = []
+        until @token.type == Tokenizer::Token::CLOSING_PAREN
+          value_expressions << parse_expression
+
+          unless @token.type == Tokenizer::Token::CLOSING_PAREN
+            raise "Invalid token #{@token.value}, expected \",\"" unless @token.type == Tokenizer::Token::COMMA
+            next_token
+          end
+        end
+
+        raise "Invalid token #{@token.value}, expected \")\"" unless @token.type == Tokenizer::Token::CLOSING_PAREN
+        next_token
+        raise "Invalid token #{@token.value}, expected \";\"" unless @token.type == Tokenizer::Token::SEMICOLON
+        next_token
+
+        return Statement.new do
+          value = get_variable(target_name)
+          @lookup_scopes << value
+          value.call_method(function_name, value_expressions.map(&:evaluate))
+          @lookup_scopes.delete(value)
+        end
       else
-        raise "Invalid token #{@token.type}, expected one of \"(\", \"=\"."
+        raise "Invalid token #{@token.type}, expected one of \"(\", \"=\", \".\"."
       end
     end
 
@@ -241,10 +300,10 @@ module Crystring
         statements << parse_statement
       end
 
-      @functions[function_name] = Function.new(@lookup_scopes, formal_params, statements)
-
       raise "Invalid token #{@token.value}, expected \"}\"" unless @token.type == Tokenizer::Token::CLOSING_CURLY
       next_token
+
+      return [function_name, Function.new(@lookup_scopes, formal_params, statements)]
     end
 
     def parse_expression
@@ -280,7 +339,7 @@ module Crystring
         raise "Invalid token #{@token.type}, expected string literal" unless @token.type == Tokenizer::Token::STRING_LITERAL
         next_token
         Expression.new do
-          value_token.value
+          Types::String.new(value_token.value)
         end
       elsif @token.type == Tokenizer::Token::IDENTIFIER
         raise "Invalid token #{@token.type}, expected identifier" unless @token.type == Tokenizer::Token::IDENTIFIER
