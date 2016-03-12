@@ -92,7 +92,7 @@ module Crystring
         return parse_if
       end
 
-      method_name = @token.value
+      function_name = @token.value
       raise "Invalid token #{@token.type}, expected identifier" unless @token.type == Tokenizer::Token::IDENTIFIER
       next_token
 
@@ -116,11 +116,11 @@ module Crystring
         next_token
 
         return Statement.new do
-          if @functions.has_key?(method_name)
+          if @functions.has_key?(function_name)
             params = value_expressions.map(&:evaluate)
-            @functions[method_name].invoke(params)
+            @functions[function_name].invoke(params)
           else
-            raise "Unknown method #{method_name}"
+            raise "Unknown function #{function_name}"
           end
         end
       elsif @token.type == Tokenizer::Token::ASSIGN
@@ -131,7 +131,7 @@ module Crystring
         next_token
 
         return Statement.new do
-          set_variable(method_name, param.evaluate)
+          set_variable(function_name, param.evaluate)
         end
       else
         raise "Invalid token #{@token.type}, expected one of \"(\", \"=\"."
@@ -191,7 +191,7 @@ module Crystring
       raise "Invalid token #{@token.type}, expected \"def\"" unless @token.type == Tokenizer::Token::KEYWORD_DEF
       next_token
 
-      method_name = @token.value
+      function_name = @token.value
       raise "Invalid token #{@token.type}, expected identifier" unless @token.type == Tokenizer::Token::IDENTIFIER
       next_token
 
@@ -223,7 +223,7 @@ module Crystring
         statements << parse_statement
       end
 
-      @functions[method_name] = Function.new(@lookup_scopes, formal_params, statements)
+      @functions[function_name] = Function.new(@lookup_scopes, formal_params, statements)
 
       raise "Invalid token #{@token.value}, expected \"}\"" unless @token.type == Tokenizer::Token::CLOSING_CURLY
       next_token
