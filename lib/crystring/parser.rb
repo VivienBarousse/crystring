@@ -1,6 +1,24 @@
 module Crystring
   class Parser
 
+    class DefaultLookupScope
+      def initialize
+        @variables = {}
+      end
+
+      def variable_exists?(name)
+        @variables.has_key?(name)
+      end
+
+      def get_variable(name)
+        @variables[name]
+      end
+
+      def set_variable(name, value)
+        @variables[name] = value
+      end
+    end
+
     class Statement
       def initialize(&block)
         @block = block
@@ -61,7 +79,7 @@ module Crystring
       @tokenizer = tokenizer
       @variables = {}
       @functions = {}
-      @lookup_scopes = []
+      @lookup_scopes = [DefaultLookupScope.new]
 
       @functions["puts"] = Function.new(
         @lookup_scopes,
@@ -282,27 +300,16 @@ module Crystring
     end
 
     def variable_exists?(name)
-      if @lookup_scopes.any? { |s| s.variable_exists?(name) }
-        true
-      else
-        @variables.has_key?(name)
-      end
+      @lookup_scopes.any? { |s| s.variable_exists?(name) }
     end
 
     def get_variable(name)
-      if scope = @lookup_scopes.detect { |s| s.variable_exists?(name) }
-        scope.get_variable(name)
-      else
-        @variables[name]
-      end
+      scope = @lookup_scopes.reverse.detect { |s| s.variable_exists?(name) }
+      scope.get_variable(name)
     end
 
     def set_variable(name, value)
-      if @lookup_scopes.any?
-        @lookup_scopes.last.set_variable(name, value)
-      else
-        @variables[name] = value
-      end
+      @lookup_scopes.last.set_variable(name, value)
     end
   end
 end
