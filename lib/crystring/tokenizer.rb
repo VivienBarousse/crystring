@@ -12,6 +12,7 @@ module Crystring
       CLOSING_CURLY = 9
       EQUALS = 10
       NOT_EQUALS = 11
+      KEYWORD_IF = 12
 
       attr_reader :type
       attr_reader :value
@@ -41,6 +42,8 @@ module Crystring
 
         if literal == "def"
           return Token.new(Token::KEYWORD_DEF, literal)
+        elsif literal == "if"
+          return Token.new(Token::KEYWORD_IF, literal)
         end
 
         return Token.new(Token::IDENTIFIER, literal)

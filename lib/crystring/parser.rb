@@ -34,6 +34,8 @@ module Crystring
           parse_statement.invoke
         elsif @token.type == Tokenizer::Token::KEYWORD_DEF
           parse_function
+        elsif @token.type == Tokenizer::Token::KEYWORD_IF
+          parse_if
         end
       end
     end
@@ -76,6 +78,37 @@ module Crystring
           set_variable(method_name, param.evaluate)
         end
       end
+    end
+
+    # "if", "(", expression, ")", "{", [statement], "}"
+    def parse_if
+      raise "Invalid token #{@token.type}, expected keyword_if" unless @token.type == Tokenizer::Token::KEYWORD_IF
+      next_token
+      raise "Invalid token #{@token.value}, expected \"(\"" unless @token.type == Tokenizer::Token::OPENING_PAREN
+      next_token
+
+      value_expression = parse_expression
+
+      raise "Invalid token #{@token.value}, expected \")\"" unless @token.type == Tokenizer::Token::CLOSING_PAREN
+      next_token
+      raise "Invalid token #{@token.value}, expected \"{\"" unless @token.type == Tokenizer::Token::OPENING_CURLY
+      next_token
+
+      statements = []
+      while @token.type != Tokenizer::Token::CLOSING_CURLY
+        statements << parse_statement
+      end
+
+      case value_expression.evaluate
+      when "true"
+        statements.each(&:invoke)
+      when "false"
+      else
+        raise "Invalid value for boolean: `#{value_expression.evaluate}`"
+      end
+
+      raise "Invalid token #{@token.value}, expected \"}\"" unless @token.type == Tokenizer::Token::CLOSING_CURLY
+      next_token
     end
 
     def parse_function
