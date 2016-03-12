@@ -1,0 +1,12 @@
+
+def hello(h) {
+  puts(h);
+  h = "Ho";
+  puts(h);
+}
+
+h = "Hi";
+puts(h);
+hello(h);
+puts(h);
+
