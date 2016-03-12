@@ -67,5 +67,11 @@ describe "Running programs" do
     let(:expected_output) { "Hello world\n" }
     it_should_behave_like "a correct program"
   end
+
+  describe "Methods calls as expressions" do
+    let(:program_name) { "method_call_as_expression.str" }
+    let(:expected_output) { "HELLO WORLD\n" }
+    it_should_behave_like "a correct program"
+  end
 end
 

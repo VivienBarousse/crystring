@@ -56,7 +56,11 @@ module Crystring
         end
         begin
           @lookup_scopes << self
-          @statements.each(&:invoke)
+          value = nil
+          @statements.each do |s|
+            value = s.invoke
+          end
+          value
         ensure
           @lookup_scopes.delete(self)
         end
@@ -86,6 +90,12 @@ module Crystring
         ["value"],
         [Statement.new { puts get_variable("value") }]
       )
+
+      Types::String.def_method("upcase", Function.new(
+        @lookup_scopes,
+        [],
+        [Statement.new { get_variable("self").upcase }]
+      ))
 
       next_token
     end
@@ -327,6 +337,36 @@ module Crystring
         rhs = parse_value
         expression = Expression.new do
           lhs.evaluate != rhs.evaluate ? "true" : "false"
+        end
+      elsif @token.type == Tokenizer::Token::PERIOD
+        next_token
+
+        target = expression
+        function_name = @token.value
+        raise "Invalid token #{@token.type}, expected identifier" unless @token.type == Tokenizer::Token::IDENTIFIER
+        next_token
+        raise "Invalid token #{@token.value}, expected \"(\"" unless @token.type == Tokenizer::Token::OPENING_PAREN
+        next_token
+
+        value_expressions = []
+        until @token.type == Tokenizer::Token::CLOSING_PAREN
+          value_expressions << parse_expression
+
+          unless @token.type == Tokenizer::Token::CLOSING_PAREN
+            raise "Invalid token #{@token.value}, expected \",\"" unless @token.type == Tokenizer::Token::COMMA
+            next_token
+          end
+        end
+
+        raise "Invalid token #{@token.value}, expected \")\"" unless @token.type == Tokenizer::Token::CLOSING_PAREN
+        next_token
+
+        expression = Expression.new do
+          value = target.evaluate
+          @lookup_scopes << value
+          result = value.call_method(function_name, value_expressions.map(&:evaluate))
+          @lookup_scopes.delete(value)
+          result
         end
       end
 
