@@ -13,6 +13,7 @@ module Crystring
       EQUALS = 10
       NOT_EQUALS = 11
       KEYWORD_IF = 12
+      KEYWORD_ELSE = 13
 
       attr_reader :type
       attr_reader :value
@@ -49,6 +50,8 @@ module Crystring
           return Token.new(Token::KEYWORD_DEF, literal)
         elsif literal == "if"
           return Token.new(Token::KEYWORD_IF, literal)
+        elsif literal == "else"
+          return Token.new(Token::KEYWORD_ELSE, literal)
         end
 
         return Token.new(Token::IDENTIFIER, literal)

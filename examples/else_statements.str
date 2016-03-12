@@ -1,0 +1,15 @@
+
+hello = "Hello world";
+if(hello == "Hello world") {
+  puts("Same value!");
+} else {
+  puts("Not same value!");
+}
+
+hello = "Hello";
+if (hello == "Hello world") {
+  puts("Not same value!");
+} else {
+  puts("Same value!");
+}
+

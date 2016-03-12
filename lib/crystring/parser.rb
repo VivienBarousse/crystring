@@ -36,6 +36,8 @@ module Crystring
           parse_function
         elsif @token.type == Tokenizer::Token::KEYWORD_IF
           parse_if
+        else
+          raise "Unexpected token `#{@token.value}`"
         end
       end
     end
@@ -77,6 +79,8 @@ module Crystring
         return Statement.new do
           set_variable(method_name, param.evaluate)
         end
+      else
+        raise "Invalid token #{@token.type}, expected one of \"(\", \"=\"."
       end
     end
 
@@ -94,21 +98,37 @@ module Crystring
       raise "Invalid token #{@token.value}, expected \"{\"" unless @token.type == Tokenizer::Token::OPENING_CURLY
       next_token
 
-      statements = []
-      while @token.type != Tokenizer::Token::CLOSING_CURLY
-        statements << parse_statement
-      end
+      if_statements = []
+      else_statements = []
 
-      case value_expression.evaluate
-      when "true"
-        statements.each(&:invoke)
-      when "false"
-      else
-        raise "Invalid value for boolean: `#{value_expression.evaluate}`"
+      while @token.type != Tokenizer::Token::CLOSING_CURLY
+        if_statements << parse_statement
       end
 
       raise "Invalid token #{@token.value}, expected \"}\"" unless @token.type == Tokenizer::Token::CLOSING_CURLY
       next_token
+
+      if @token && @token.type == Tokenizer::Token::KEYWORD_ELSE
+        next_token
+        raise "Invalid token #{@token.value}, expected \"{\"" unless @token.type == Tokenizer::Token::OPENING_CURLY
+        next_token
+
+        while @token.type != Tokenizer::Token::CLOSING_CURLY
+          else_statements << parse_statement
+        end
+
+        raise "Invalid token #{@token.value}, expected \"}\"" unless @token.type == Tokenizer::Token::CLOSING_CURLY
+        next_token
+      end
+
+      case value_expression.evaluate
+      when "true"
+        if_statements.each(&:invoke)
+      when "false"
+        else_statements.each(&:invoke)
+      else
+        raise "Invalid value for boolean: `#{value_expression.evaluate}`"
+      end
     end
 
     def parse_function
