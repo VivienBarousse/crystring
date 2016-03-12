@@ -21,10 +21,47 @@ module Crystring
       end
     end
 
+    class Function
+      def initialize(lookup_scopes, formal_params, statements)
+        @lookup_scopes = lookup_scopes
+        @formal_params = formal_params
+        @statements = statements
+        @variables = {}
+      end
+
+      def invoke(actual_params)
+        unless @formal_params.length == actual_params.length
+          raise "Invalid cardinality for function: expected #{@formal_params.length} arguments, got #{actual_params.length}"
+        end
+        @formal_params.length.times do |i|
+          @variables[@formal_params[i]] = actual_params[i]
+        end
+        begin
+          @lookup_scopes << self
+          @statements.each(&:invoke)
+        ensure
+          @lookup_scopes.delete(self)
+        end
+      end
+
+      def variable_exists?(name)
+        @variables.has_key?(name)
+      end
+
+      def get_variable(name)
+        @variables[name]
+      end
+
+      def set_variable(name, value)
+        @variables[name] = value
+      end
+    end
+
     def initialize(tokenizer)
       @tokenizer = tokenizer
       @variables = {}
       @functions = {}
+      @lookup_scopes = []
       next_token
     end
 
@@ -35,7 +72,7 @@ module Crystring
         elsif @token.type == Tokenizer::Token::KEYWORD_DEF
           parse_function
         elsif @token.type == Tokenizer::Token::KEYWORD_IF
-          parse_if
+          parse_if.invoke
         else
           raise "Unexpected token `#{@token.value}`"
         end
@@ -44,6 +81,10 @@ module Crystring
 
     # identifier, "(", value, ")"
     def parse_statement
+      if @token.type == Tokenizer::Token::KEYWORD_IF
+        return parse_if
+      end
+
       method_name = @token.value
       raise "Invalid token #{@token.type}, expected identifier" unless @token.type == Tokenizer::Token::IDENTIFIER
       next_token
@@ -64,7 +105,8 @@ module Crystring
             param = value_expression.evaluate
             puts param
           elsif @functions.has_key?(method_name)
-            @functions[method_name].each(&:invoke)
+            param = value_expression && value_expression.evaluate
+            @functions[method_name].invoke(value_expression ? [param] : [])
           else
             raise "Unknown method #{method_name}"
           end
@@ -121,13 +163,15 @@ module Crystring
         next_token
       end
 
-      case value_expression.evaluate
-      when "true"
-        if_statements.each(&:invoke)
-      when "false"
-        else_statements.each(&:invoke)
-      else
-        raise "Invalid value for boolean: `#{value_expression.evaluate}`"
+      return Statement.new do
+        case value_expression.evaluate
+        when "true"
+          if_statements.each(&:invoke)
+        when "false"
+          else_statements.each(&:invoke)
+        else
+          raise "Invalid value for boolean: `#{value_expression.evaluate}`"
+        end
       end
     end
 
@@ -142,6 +186,12 @@ module Crystring
       raise "Invalid token #{@token.value}, expected \"(\"" unless @token.type == Tokenizer::Token::OPENING_PAREN
       next_token
 
+      formal_params = []
+      if @token.type == Tokenizer::Token::IDENTIFIER
+        formal_params << @token.value
+        next_token
+      end
+
       raise "Invalid token #{@token.value}, expected \")\"" unless @token.type == Tokenizer::Token::CLOSING_PAREN
       next_token
 
@@ -153,7 +203,7 @@ module Crystring
         statements << parse_statement
       end
 
-      @functions[method_name] = statements
+      @functions[method_name] = Function.new(@lookup_scopes, formal_params, statements)
 
       raise "Invalid token #{@token.value}, expected \"}\"" unless @token.type == Tokenizer::Token::CLOSING_CURLY
       next_token
@@ -212,15 +262,27 @@ module Crystring
     end
 
     def variable_exists?(name)
-      @variables.has_key?(name)
+      if @lookup_scopes.any? { |s| s.variable_exists?(name) }
+        true
+      else
+        @variables.has_key?(name)
+      end
     end
 
     def get_variable(name)
-      @variables[name]
+      if scope = @lookup_scopes.detect { |s| s.variable_exists?(name) }
+        scope.get_variable(name)
+      else
+        @variables[name]
+      end
     end
 
     def set_variable(name, value)
-      @variables[name] = value
+      if @lookup_scopes.any?
+        @lookup_scopes.last.set_variable(name, value)
+      else
+        @variables[name] = value
+      end
     end
   end
 end

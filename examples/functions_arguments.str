@@ -1,0 +1,13 @@
+
+
+def maybehello(h) {
+  if (h == "Hello") {
+    puts("Yes, hello");
+  } else {
+    puts("No, not hello");
+  }
+}
+
+maybehello("Hello");
+maybehello("Bye");
+
