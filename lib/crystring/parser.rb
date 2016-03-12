@@ -11,6 +11,16 @@ module Crystring
       end
     end
 
+    class Expression
+      def initialize(&block)
+        @block = block
+      end
+
+      def evaluate
+        @block.call
+      end
+    end
+
     def initialize(tokenizer)
       @tokenizer = tokenizer
       @variables = {}
@@ -37,14 +47,8 @@ module Crystring
       if @token.type == Tokenizer::Token::OPENING_PAREN
         raise "Invalid token #{@token.value}, expected \"(\"" unless @token.type == Tokenizer::Token::OPENING_PAREN
         next_token
-        if @token.type == Tokenizer::Token::STRING_LITERAL
-          value_token = @token
-          raise "Invalid token #{@token.type}, expected string literal" unless @token.type == Tokenizer::Token::STRING_LITERAL
-          next_token
-        elsif @token.type == Tokenizer::Token::IDENTIFIER
-          raise "Invalid token #{@token.type}, expected identifier" unless @token.type == Tokenizer::Token::IDENTIFIER
-          value_token = @token
-          next_token
+        unless @token.type == Tokenizer::Token::CLOSING_PAREN
+          value_expression = parse_expression
         end
         raise "Invalid token #{@token.value}, expected \")\"" unless @token.type == Tokenizer::Token::CLOSING_PAREN
         next_token
@@ -53,12 +57,7 @@ module Crystring
 
         return Statement.new do
           if method_name == "puts"
-            if value_token.type == Tokenizer::Token::STRING_LITERAL
-              param = value_token.value
-            elsif value_token.type == Tokenizer::Token::IDENTIFIER
-              raise "Unknown variable '#{value_token.value}'" unless variable_exists?(value_token.value)
-              param = get_variable(value_token.value)
-            end
+            param = value_expression.evaluate
             puts param
           elsif @functions.has_key?(method_name)
             @functions[method_name].each(&:invoke)
@@ -69,14 +68,12 @@ module Crystring
       elsif @token.type == Tokenizer::Token::ASSIGN
         raise "Invalid token #{@token.value}, expected \"=\"" unless @token.type == Tokenizer::Token::ASSIGN
         next_token
-        param = @token.value
-        raise "Invalid token #{@token.type}, expected string literal" unless @token.type == Tokenizer::Token::STRING_LITERAL
-        next_token
+        param = parse_expression
         raise "Invalid token #{@token.value}, expected \";\"" unless @token.type == Tokenizer::Token::SEMICOLON
         next_token
 
         return Statement.new do
-          set_variable(method_name, param)
+          set_variable(method_name, param.evaluate)
         end
       end
     end
@@ -107,6 +104,52 @@ module Crystring
 
       raise "Invalid token #{@token.value}, expected \"}\"" unless @token.type == Tokenizer::Token::CLOSING_CURLY
       next_token
+    end
+
+    def parse_expression
+      case @token.type
+      when Tokenizer::Token::STRING_LITERAL, Tokenizer::Token::IDENTIFIER
+        expression = parse_value
+      else
+        raise "Invalid token #{@token.type}, expected expression"
+      end
+
+      if @token.type == Tokenizer::Token::EQUALS
+        next_token
+        lhs = expression
+        rhs = parse_value
+        expression = Expression.new do
+          lhs.evaluate == rhs.evaluate ? "true" : "false"
+        end
+      elsif @token.type == Tokenizer::Token::NOT_EQUALS
+        next_token
+        lhs = expression
+        rhs = parse_value
+        expression = Expression.new do
+          lhs.evaluate != rhs.evaluate ? "true" : "false"
+        end
+      end
+
+      expression
+    end
+
+    def parse_value
+      if @token.type == Tokenizer::Token::STRING_LITERAL
+        value_token = @token
+        raise "Invalid token #{@token.type}, expected string literal" unless @token.type == Tokenizer::Token::STRING_LITERAL
+        next_token
+        Expression.new do
+          value_token.value
+        end
+      elsif @token.type == Tokenizer::Token::IDENTIFIER
+        raise "Invalid token #{@token.type}, expected identifier" unless @token.type == Tokenizer::Token::IDENTIFIER
+        value_token = @token
+        next_token
+        Expression.new do
+          raise "Unknown variable '#{value_token.value}'" unless variable_exists?(value_token.value)
+          get_variable(value_token.value)
+        end
+      end
     end
 
     private

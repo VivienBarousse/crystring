@@ -1,0 +1,10 @@
+
+hello = "Hello world";
+puts(hello == "Hello world");
+puts(hello != "Hello world");
+
+ra = hello == "Hello world";
+rb = hello != "Hello world";
+puts(ra);
+puts(rb);
+

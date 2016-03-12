@@ -10,6 +10,8 @@ module Crystring
       KEYWORD_DEF = 7
       OPENING_CURLY = 8
       CLOSING_CURLY = 9
+      EQUALS = 10
+      NOT_EQUALS = 11
 
       attr_reader :type
       attr_reader :value
@@ -59,7 +61,18 @@ module Crystring
         return Token.new(Token::SEMICOLON, ';')
       elsif @char == "="
         next_char
+        if @char == "="
+          next_char
+          return Token.new(Token::EQUALS, '==')
+        end
         return Token.new(Token::ASSIGN, '=')
+      elsif @char == '!'
+        next_char
+        if @char == '='
+          next_char
+          return Token.new(Token::NOT_EQUALS, '!=')
+        end
+        raise "Invalid character `!`"
       elsif @char == '"'
         str = ""
         next_char

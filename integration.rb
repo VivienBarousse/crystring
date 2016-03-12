@@ -10,4 +10,5 @@ end
 test_program("examples/hello_world.str", "Hello world!\n")
 test_program("examples/variables.str", "Hello world!\n")
 test_program("examples/functions.str", "Hello world!\nHello world!\n")
+test_program("examples/booleans.str", "true\nfalse\ntrue\nfalse\n")
 
