@@ -1,0 +1,11 @@
+
+class String {
+  def print() {
+    puts(self);
+  }
+}
+
+hello = "Hello world";
+hello.upcase().print();
+puts(hello.upcase().downcase());
+

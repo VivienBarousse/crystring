@@ -30,12 +30,13 @@ module Crystring
     end
 
     class Expression
-      def initialize(&block)
+      def initialize(*args, &block)
+        @args = args
         @block = block
       end
 
       def evaluate
-        @block.call
+        @block.call(*@args)
       end
     end
 
@@ -94,7 +95,12 @@ module Crystring
       Types::String.def_method("upcase", Function.new(
         @lookup_scopes,
         [],
-        [Statement.new { get_variable("self").upcase }]
+        [Statement.new { Types::String.new(get_variable("self").upcase) }]
+      ))
+      Types::String.def_method("downcase", Function.new(
+        @lookup_scopes,
+        [],
+        [Statement.new { Types::String.new(get_variable("self").downcase) }]
       ))
 
       next_token
@@ -189,36 +195,49 @@ module Crystring
           set_variable(function_name, param.evaluate)
         end
       elsif @token.type == Tokenizer::Token::PERIOD
-        next_token
         target_name = function_name
+        expression = Expression.new do
+          get_variable(target_name)
+        end
 
-        function_name = @token.value
-        raise "Invalid token #{@token.type}, expected identifier" unless @token.type == Tokenizer::Token::IDENTIFIER
-        next_token
+        while @token.type == Tokenizer::Token::PERIOD
+          next_token
 
-        raise "Invalid token #{@token.value}, expected \"(\"" unless @token.type == Tokenizer::Token::OPENING_PAREN
-        next_token
+          function_name = @token.value
+          raise "Invalid token #{@token.type}, expected identifier" unless @token.type == Tokenizer::Token::IDENTIFIER
+          next_token
 
-        value_expressions = []
-        until @token.type == Tokenizer::Token::CLOSING_PAREN
-          value_expressions << parse_expression
+          raise "Invalid token #{@token.value}, expected \"(\"" unless @token.type == Tokenizer::Token::OPENING_PAREN
+          next_token
 
-          unless @token.type == Tokenizer::Token::CLOSING_PAREN
-            raise "Invalid token #{@token.value}, expected \",\"" unless @token.type == Tokenizer::Token::COMMA
-            next_token
+          value_expressions = []
+          until @token.type == Tokenizer::Token::CLOSING_PAREN
+            value_expressions << parse_expression
+
+            unless @token.type == Tokenizer::Token::CLOSING_PAREN
+              raise "Invalid token #{@token.value}, expected \",\"" unless @token.type == Tokenizer::Token::COMMA
+              next_token
+            end
+          end
+
+          raise "Invalid token #{@token.value}, expected \")\"" unless @token.type == Tokenizer::Token::CLOSING_PAREN
+          next_token
+
+          previous_expression = expression
+          expression = Expression.new(function_name, previous_expression) do |f, target_exp|
+            value = target_exp.evaluate
+            @lookup_scopes << value
+            returned = value.call_method(f, value_expressions.map(&:evaluate))
+            @lookup_scopes.delete(value)
+            returned
           end
         end
 
-        raise "Invalid token #{@token.value}, expected \")\"" unless @token.type == Tokenizer::Token::CLOSING_PAREN
-        next_token
         raise "Invalid token #{@token.value}, expected \";\"" unless @token.type == Tokenizer::Token::SEMICOLON
         next_token
 
         return Statement.new do
-          value = get_variable(target_name)
-          @lookup_scopes << value
-          value.call_method(function_name, value_expressions.map(&:evaluate))
-          @lookup_scopes.delete(value)
+          expression.evaluate
         end
       else
         raise "Invalid token #{@token.type}, expected one of \"(\", \"=\", \".\"."
@@ -339,34 +358,36 @@ module Crystring
           lhs.evaluate != rhs.evaluate ? "true" : "false"
         end
       elsif @token.type == Tokenizer::Token::PERIOD
-        next_token
-
         target = expression
-        function_name = @token.value
-        raise "Invalid token #{@token.type}, expected identifier" unless @token.type == Tokenizer::Token::IDENTIFIER
-        next_token
-        raise "Invalid token #{@token.value}, expected \"(\"" unless @token.type == Tokenizer::Token::OPENING_PAREN
-        next_token
 
-        value_expressions = []
-        until @token.type == Tokenizer::Token::CLOSING_PAREN
-          value_expressions << parse_expression
+        while @token.type == Tokenizer::Token::PERIOD
+          next_token
+          function_name = @token.value
+          raise "Invalid token #{@token.type}, expected identifier" unless @token.type == Tokenizer::Token::IDENTIFIER
+          next_token
+          raise "Invalid token #{@token.value}, expected \"(\"" unless @token.type == Tokenizer::Token::OPENING_PAREN
+          next_token
 
-          unless @token.type == Tokenizer::Token::CLOSING_PAREN
-            raise "Invalid token #{@token.value}, expected \",\"" unless @token.type == Tokenizer::Token::COMMA
-            next_token
+          value_expressions = []
+          until @token.type == Tokenizer::Token::CLOSING_PAREN
+            value_expressions << parse_expression
+
+            unless @token.type == Tokenizer::Token::CLOSING_PAREN
+              raise "Invalid token #{@token.value}, expected \",\"" unless @token.type == Tokenizer::Token::COMMA
+              next_token
+            end
           end
-        end
 
-        raise "Invalid token #{@token.value}, expected \")\"" unless @token.type == Tokenizer::Token::CLOSING_PAREN
-        next_token
+          raise "Invalid token #{@token.value}, expected \")\"" unless @token.type == Tokenizer::Token::CLOSING_PAREN
+          next_token
 
-        expression = Expression.new do
-          value = target.evaluate
-          @lookup_scopes << value
-          result = value.call_method(function_name, value_expressions.map(&:evaluate))
-          @lookup_scopes.delete(value)
-          result
+          expression = Expression.new(function_name, target) do |f, target|
+            value = target.evaluate
+            @lookup_scopes << value
+            result = value.call_method(f, value_expressions.map(&:evaluate))
+            @lookup_scopes.delete(value)
+            result
+          end
         end
       end
 

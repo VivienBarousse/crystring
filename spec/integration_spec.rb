@@ -73,5 +73,11 @@ describe "Running programs" do
     let(:expected_output) { "HELLO WORLD\n" }
     it_should_behave_like "a correct program"
   end
+
+  describe "Chained method calls" do
+    let(:program_name) { "chained_method_calls.str" }
+    let(:expected_output) { "HELLO WORLD\nhello world\n" }
+    it_should_behave_like "a correct program"
+  end
 end
 
