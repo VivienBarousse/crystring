@@ -85,5 +85,11 @@ describe "Running programs" do
     let(:expected_output) { "0\n1\n2\n3\n4\n" }
     it_should_behave_like "a correct program"
   end
+
+  describe "Calling methods on literals" do
+    let(:program_name) { "method_call_on_literal.str" }
+    let(:expected_output) { "HELLO WORLD\n" }
+    it_should_behave_like "a correct program"
+  end
 end
 
