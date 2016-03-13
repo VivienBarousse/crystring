@@ -17,6 +17,7 @@ module Crystring
       COMMA = 14
       PERIOD = 15
       KEYWORD_CLASS = 16
+      KEYWORD_WHILE = 17
 
       attr_reader :type
       attr_reader :value
@@ -57,6 +58,8 @@ module Crystring
           return Token.new(Token::KEYWORD_ELSE, literal)
         elsif literal == "class"
           return Token.new(Token::KEYWORD_CLASS, literal)
+        elsif literal == "while"
+          return Token.new(Token::KEYWORD_WHILE, literal)
         end
 
         return Token.new(Token::IDENTIFIER, literal)

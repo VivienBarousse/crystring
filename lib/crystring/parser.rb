@@ -115,6 +115,8 @@ module Crystring
           @functions[f[0]] = f[1]
         elsif @token.type == Tokenizer::Token::KEYWORD_IF
           parse_if.invoke
+        elsif @token.type == Tokenizer::Token::KEYWORD_WHILE
+          parse_while.invoke
         elsif @token.type == Tokenizer::Token::KEYWORD_CLASS
           parse_class
         else
@@ -289,6 +291,36 @@ module Crystring
           else_statements.each(&:invoke)
         else
           raise "Invalid value for boolean: `#{value_expression.evaluate}`"
+        end
+      end
+    end
+
+    # "while", "(", expression, ")", "{", [statement], "}"
+    def parse_while
+      raise "Invalid token #{@token.type}, expected keyword_while" unless @token.type == Tokenizer::Token::KEYWORD_WHILE
+      next_token
+      raise "Invalid token #{@token.value}, expected \"(\"" unless @token.type == Tokenizer::Token::OPENING_PAREN
+      next_token
+
+      value_expression = parse_expression
+
+      raise "Invalid token #{@token.value}, expected \")\"" unless @token.type == Tokenizer::Token::CLOSING_PAREN
+      next_token
+      raise "Invalid token #{@token.value}, expected \"{\"" unless @token.type == Tokenizer::Token::OPENING_CURLY
+      next_token
+
+      while_statements = []
+
+      while @token.type != Tokenizer::Token::CLOSING_CURLY
+        while_statements << parse_statement
+      end
+
+      raise "Invalid token #{@token.value}, expected \"}\"" unless @token.type == Tokenizer::Token::CLOSING_CURLY
+      next_token
+
+      return Statement.new do
+        while value_expression.evaluate == "true"
+          while_statements.each(&:invoke)
         end
       end
     end

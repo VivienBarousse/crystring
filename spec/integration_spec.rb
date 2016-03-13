@@ -79,5 +79,11 @@ describe "Running programs" do
     let(:expected_output) { "HELLO WORLD\nhello world\n" }
     it_should_behave_like "a correct program"
   end
+
+  describe "While statements" do
+    let(:program_name) { "while_statements.str" }
+    let(:expected_output) { "0\n1\n2\n3\n4\n" }
+    it_should_behave_like "a correct program"
+  end
 end
 
