@@ -63,7 +63,7 @@ module Crystring
           end
           value
         ensure
-          @lookup_scopes.delete(self)
+          @lookup_scopes.pop
         end
       end
 
@@ -230,7 +230,7 @@ module Crystring
             value = target_exp.evaluate
             @lookup_scopes << value
             returned = value.call_method(f, value_expressions.map(&:evaluate))
-            @lookup_scopes.delete(value)
+            @lookup_scopes.pop
             returned
           end
         end
@@ -397,7 +397,7 @@ module Crystring
             value = target.evaluate
             @lookup_scopes << value
             result = value.call_method(f, value_expressions.map(&:evaluate))
-            @lookup_scopes.delete(value)
+            @lookup_scopes.pop
             result
           end
         end
