@@ -257,30 +257,13 @@ module Crystring
 
       raise "Invalid token #{@token.value}, expected \")\"" unless @token.type == Tokenizer::Token::CLOSING_PAREN
       next_token
-      raise "Invalid token #{@token.value}, expected \"{\"" unless @token.type == Tokenizer::Token::OPENING_CURLY
-      next_token
 
-      if_statements = []
+      if_statements = parse_statements_block
       else_statements = []
-
-      while @token.type != Tokenizer::Token::CLOSING_CURLY
-        if_statements << parse_statement
-      end
-
-      raise "Invalid token #{@token.value}, expected \"}\"" unless @token.type == Tokenizer::Token::CLOSING_CURLY
-      next_token
 
       if @token && @token.type == Tokenizer::Token::KEYWORD_ELSE
         next_token
-        raise "Invalid token #{@token.value}, expected \"{\"" unless @token.type == Tokenizer::Token::OPENING_CURLY
-        next_token
-
-        while @token.type != Tokenizer::Token::CLOSING_CURLY
-          else_statements << parse_statement
-        end
-
-        raise "Invalid token #{@token.value}, expected \"}\"" unless @token.type == Tokenizer::Token::CLOSING_CURLY
-        next_token
+        else_statements = parse_statements_block
       end
 
       return Statement.new do
@@ -306,17 +289,8 @@ module Crystring
 
       raise "Invalid token #{@token.value}, expected \")\"" unless @token.type == Tokenizer::Token::CLOSING_PAREN
       next_token
-      raise "Invalid token #{@token.value}, expected \"{\"" unless @token.type == Tokenizer::Token::OPENING_CURLY
-      next_token
 
-      while_statements = []
-
-      while @token.type != Tokenizer::Token::CLOSING_CURLY
-        while_statements << parse_statement
-      end
-
-      raise "Invalid token #{@token.value}, expected \"}\"" unless @token.type == Tokenizer::Token::CLOSING_CURLY
-      next_token
+      while_statements = parse_statements_block
 
       return Statement.new do
         while value_expression.evaluate == "true"
@@ -353,6 +327,12 @@ module Crystring
       raise "Invalid token #{@token.value}, expected \")\"" unless @token.type == Tokenizer::Token::CLOSING_PAREN
       next_token
 
+      statements = parse_statements_block
+
+      return [function_name, Function.new(@lookup_scopes, formal_params, statements)]
+    end
+
+    def parse_statements_block
       raise "Invalid token #{@token.value}, expected \"{\"" unless @token.type == Tokenizer::Token::OPENING_CURLY
       next_token
 
@@ -364,7 +344,7 @@ module Crystring
       raise "Invalid token #{@token.value}, expected \"}\"" unless @token.type == Tokenizer::Token::CLOSING_CURLY
       next_token
 
-      return [function_name, Function.new(@lookup_scopes, formal_params, statements)]
+      statements
     end
 
     def parse_expression
