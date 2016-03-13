@@ -1,0 +1,4 @@
+
+puts(hello = "Hello world");
+puts(hello);
+

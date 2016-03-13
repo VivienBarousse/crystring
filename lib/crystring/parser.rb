@@ -149,7 +149,7 @@ module Crystring
       next_token
     end
 
-    # identifier, "(", value, ")"
+    # expression, ";"
     def parse_statement
       if @token.type == Tokenizer::Token::KEYWORD_IF
         return parse_if
@@ -350,6 +350,9 @@ module Crystring
     def parse_expression
       case @token.type
       when Tokenizer::Token::STRING_LITERAL, Tokenizer::Token::IDENTIFIER
+        if @token.type == Tokenizer::Token::IDENTIFIER
+          expression_name = @token.value
+        end
         expression = parse_value
       else
         raise "Invalid token #{@token.type}, expected expression"
@@ -368,6 +371,41 @@ module Crystring
         rhs = parse_value
         expression = Expression.new do
           lhs.evaluate != rhs.evaluate ? "true" : "false"
+        end
+      elsif @token.type == Tokenizer::Token::ASSIGN
+        raise "Invalid token #{@token.value}, expected \"=\"" unless @token.type == Tokenizer::Token::ASSIGN
+        next_token
+        param = parse_expression
+
+        return Expression.new do
+          v = param.evaluate
+          set_variable(expression_name, v)
+          v
+        end
+      elsif @token.type == Tokenizer::Token::OPENING_PAREN
+        raise "Invalid token #{@token.value}, expected \"(\"" unless @token.type == Tokenizer::Token::OPENING_PAREN
+        next_token
+
+        value_expressions = []
+        until @token.type == Tokenizer::Token::CLOSING_PAREN
+          value_expressions << parse_expression
+
+          unless @token.type == Tokenizer::Token::CLOSING_PAREN
+            raise "Invalid token #{@token.value}, expected \",\"" unless @token.type == Tokenizer::Token::COMMA
+            next_token
+          end
+        end
+
+        raise "Invalid token #{@token.value}, expected \")\"" unless @token.type == Tokenizer::Token::CLOSING_PAREN
+        next_token
+
+        return Expression.new do
+          if @functions.has_key?(expression_name)
+            params = value_expressions.map(&:evaluate)
+            @functions[expression_name].invoke(params)
+          else
+            raise "Unknown function #{expression_name}"
+          end
         end
       elsif @token.type == Tokenizer::Token::PERIOD
         target = expression

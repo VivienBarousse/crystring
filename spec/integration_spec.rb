@@ -91,5 +91,17 @@ describe "Running programs" do
     let(:expected_output) { "HELLO WORLD\n" }
     it_should_behave_like "a correct program"
   end
+
+  describe "Assignment as expressions" do
+    let(:program_name) { "assignment_as_expressions.str" }
+    let(:expected_output) { "Hello world\nHello world\n" }
+    it_should_behave_like "a correct program"
+  end
+
+  describe "Function calls as expressions" do
+    let(:program_name) { "function_call_as_expressions.str" }
+    let(:expected_output) { "HELLO WORLD\n" }
+    it_should_behave_like "a correct program"
+  end
 end
 
