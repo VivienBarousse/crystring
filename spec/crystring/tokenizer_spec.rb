@@ -12,6 +12,17 @@ describe Crystring::Tokenizer do
     end
   end
 
+  describe "keywords" do
+    describe "elsif" do
+      let(:code) { "elsif" }
+
+      it "should return a keyword token" do
+        expect(subject.next_token).to eq(Crystring::Tokenizer::Token.new(Crystring::Tokenizer::Token::KEYWORD_ELSIF, "elsif"))
+        expect(subject.next_token).to be_nil
+      end
+    end
+  end
+
   describe "strings" do
     let(:code) { "\"string\" \"abc\"" }
 

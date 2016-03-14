@@ -44,6 +44,12 @@ describe "Running programs" do
     it_should_behave_like "a correct program"
   end
 
+  describe "Elsif statements" do
+    let(:program_name) { "elsif_statements.str" }
+    let(:expected_output) { "0\n1\n2\n3\n4\n" }
+    it_should_behave_like "a correct program"
+  end
+
   describe "Functions with arguments" do
     let(:program_name) { "functions_arguments.str" }
     let(:expected_output) { "Yes, hello\nNo, not hello\n" }

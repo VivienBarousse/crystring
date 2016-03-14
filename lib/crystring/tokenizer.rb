@@ -22,6 +22,7 @@ module Crystring
       PERIOD = 15
       KEYWORD_CLASS = 16
       KEYWORD_WHILE = 17
+      KEYWORD_ELSIF = 18
 
       attr_reader :type
       attr_reader :value
@@ -58,6 +59,8 @@ module Crystring
           return Token.new(Token::KEYWORD_DEF, identifier)
         elsif identifier == "if"
           return Token.new(Token::KEYWORD_IF, identifier)
+        elsif identifier == "elsif"
+          return Token.new(Token::KEYWORD_ELSIF, identifier)
         elsif identifier == "else"
           return Token.new(Token::KEYWORD_ELSE, identifier)
         elsif identifier == "class"

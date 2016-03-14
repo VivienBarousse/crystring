@@ -20,12 +20,13 @@ module Crystring
     end
 
     class Statement
-      def initialize(&block)
+      def initialize(*args, &block)
+        @args = args
         @block = block
       end
 
       def invoke
-        @block.call
+        @block.call(*@args)
       end
     end
 
@@ -172,25 +173,50 @@ module Crystring
       raise "Invalid token #{@token.value}, expected \"(\"" unless @token.type == Tokenizer::Token::OPENING_PAREN
       next_token
 
-      value_expression = parse_expression
+      if_value_expression = parse_expression
 
       raise "Invalid token #{@token.value}, expected \")\"" unless @token.type == Tokenizer::Token::CLOSING_PAREN
       next_token
 
       if_statements = parse_statements_block
+      elsif_statements = []
       else_statements = []
+
+      while @token && @token.type == Tokenizer::Token::KEYWORD_ELSIF
+        raise "Invalid token #{@token.type}, expected keyword_if" unless @token.type == Tokenizer::Token::KEYWORD_ELSIF
+        next_token
+        raise "Invalid token #{@token.value}, expected \"(\"" unless @token.type == Tokenizer::Token::OPENING_PAREN
+        next_token
+
+        value_expression = parse_expression
+
+        raise "Invalid token #{@token.value}, expected \")\"" unless @token.type == Tokenizer::Token::CLOSING_PAREN
+        next_token
+
+        elsif_statements << [value_expression, parse_statements_block]
+      end
 
       if @token && @token.type == Tokenizer::Token::KEYWORD_ELSE
         next_token
         else_statements = parse_statements_block
       end
 
-      return Statement.new do
-        case value_expression.evaluate
+      return Statement.new(elsif_statements) do |elsif_statements|
+        case if_value_expression.evaluate
         when "true"
           if_statements.each(&:invoke)
         when "false"
-          else_statements.each(&:invoke)
+          elsif_evaluated = false
+          elsif_statements.each do |expr, statements|
+            if expr.evaluate == "true"
+              elsif_evaluated = true
+              statements.each(&:invoke)
+              break
+            end
+          end
+          unless elsif_evaluated
+            else_statements.each(&:invoke)
+          end
         else
           raise "Invalid value for boolean: `#{value_expression.evaluate}`"
         end
