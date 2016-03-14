@@ -23,6 +23,7 @@ module Crystring
       KEYWORD_CLASS = 16
       KEYWORD_WHILE = 17
       KEYWORD_ELSIF = 18
+      PLUS = 19
 
       attr_reader :type
       attr_reader :value
@@ -91,6 +92,9 @@ module Crystring
       elsif @char == '.'
         next_char
         return Token.new(Token::PERIOD, '.')
+      elsif @char == '+'
+        next_char
+        return Token.new(Token::PLUS, '+')
       elsif @char == "="
         next_char
         if @char == "="

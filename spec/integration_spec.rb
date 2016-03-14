@@ -115,5 +115,11 @@ describe "Running programs" do
     let(:expected_output) { "12\n" }
     it_should_behave_like "a correct program"
   end
+
+  describe "Integer addition" do
+    let(:program_name) { "integer_addition.str" }
+    let(:expected_output) { "18\n" }
+    it_should_behave_like "a correct program"
+  end
 end
 

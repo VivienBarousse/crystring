@@ -104,6 +104,12 @@ module Crystring
         [Statement.new { Types::String.new(get_variable("self").downcase) }]
       ))
 
+      Types::Integer.def_method("+", Function.new(
+        @lookup_scopes,
+        ["a"],
+        [Statement.new { Types::Integer.new((Integer(get_variable("self").to_s) + Integer(get_variable("a").to_s)).to_s) }]
+      ))
+
       set_variable("Integer", Types::Integer)
       set_variable("String", Types::String)
 
@@ -303,6 +309,17 @@ module Crystring
         rhs = parse_value
         expression = Expression.new do
           lhs.evaluate == rhs.evaluate ? "true" : "false"
+        end
+      elsif @token.type == Tokenizer::Token::PLUS
+        next_token
+        lhs = expression
+        rhs = parse_value
+        expression = Expression.new do
+          value = lhs.evaluate
+          @lookup_scopes << value
+          result = value.call_method("+", [rhs.evaluate])
+          @lookup_scopes.pop
+          result
         end
       elsif @token.type == Tokenizer::Token::NOT_EQUALS
         next_token
