@@ -1,0 +1,4 @@
+
+a = Integer.new("12");
+puts(a);
+

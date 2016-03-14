@@ -109,5 +109,11 @@ describe "Running programs" do
     let(:expected_output) { "HELLO WORLD\n" }
     it_should_behave_like "a correct program"
   end
+
+  describe "Integer as a type" do
+    let(:program_name) { "integer_type.str" }
+    let(:expected_output) { "12\n" }
+    it_should_behave_like "a correct program"
+  end
 end
 

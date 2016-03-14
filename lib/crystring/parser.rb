@@ -104,6 +104,9 @@ module Crystring
         [Statement.new { Types::String.new(get_variable("self").downcase) }]
       ))
 
+      set_variable("Integer", Types::Integer)
+      set_variable("String", Types::String)
+
       next_token
     end
 

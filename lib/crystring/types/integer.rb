@@ -1,6 +1,6 @@
 module Crystring
   module Types
-    class String
+    class Integer
       def initialize(str)
         @str = str
         @variables = {}
@@ -52,4 +52,5 @@ module Crystring
     end
   end
 end
+
 
