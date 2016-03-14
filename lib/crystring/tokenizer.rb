@@ -1,5 +1,9 @@
 module Crystring
   class Tokenizer
+
+    class UnfinishedLiteral < StandardError
+    end
+
     class Token
       STRING_LITERAL = 1
       OPENING_PAREN = 2
@@ -101,9 +105,12 @@ module Crystring
       elsif @char == '"'
         str = ""
         next_char
-        while @char != '"'
+        while @char && @char != '"'
           str << @char
           next_char
+        end
+        unless @char == '"'
+          raise UnfinishedLiteral.new
         end
         next_char
         return Token.new(Token::STRING_LITERAL, str)
