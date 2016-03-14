@@ -48,25 +48,25 @@ module Crystring
       end
 
       if @char && (@char >= 'a' && @char <= 'z' || @char >= 'A' && @char <= 'Z')
-        literal = ""
+        identifier = ""
         while @char && (@char >= 'a' && @char <= 'z' || @char >= 'A' && @char <= 'Z')
-          literal << @char
+          identifier << @char
           next_char
         end
 
-        if literal == "def"
-          return Token.new(Token::KEYWORD_DEF, literal)
-        elsif literal == "if"
-          return Token.new(Token::KEYWORD_IF, literal)
-        elsif literal == "else"
-          return Token.new(Token::KEYWORD_ELSE, literal)
-        elsif literal == "class"
-          return Token.new(Token::KEYWORD_CLASS, literal)
-        elsif literal == "while"
-          return Token.new(Token::KEYWORD_WHILE, literal)
+        if identifier == "def"
+          return Token.new(Token::KEYWORD_DEF, identifier)
+        elsif identifier == "if"
+          return Token.new(Token::KEYWORD_IF, identifier)
+        elsif identifier == "else"
+          return Token.new(Token::KEYWORD_ELSE, identifier)
+        elsif identifier == "class"
+          return Token.new(Token::KEYWORD_CLASS, identifier)
+        elsif identifier == "while"
+          return Token.new(Token::KEYWORD_WHILE, identifier)
         end
 
-        return Token.new(Token::IDENTIFIER, literal)
+        return Token.new(Token::IDENTIFIER, identifier)
       elsif @char == '('
         next_char
         return Token.new(Token::OPENING_PAREN, '(')
