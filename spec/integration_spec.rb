@@ -1,13 +1,29 @@
 require 'spec_helper'
+require 'open3'
 
 shared_examples("a correct program") do
   it "should give the correct output" do
-    actual_output = `ruby bin/crystring examples/#{program_name}`
-    expect(actual_output).to eq(expected_output)
+    begin
+      input, output, error, pid = Open3.popen3("ruby bin/crystring examples/#{program_name}")
+      if given_input
+        input << given_input
+      end
+      Timeout.timeout(timeout) do
+        actual_output = output.read
+        actual_error = error.read
+        expect(actual_error).to eq("")
+        expect(actual_output).to eq(expected_output)
+      end
+    rescue Timeout::Error => e
+      raise "Program took more than maximum #{timeout} seconds to execute"
+    end
   end
 end
 
 describe "Running programs" do
+  let(:given_input) { nil }
+  let(:timeout) { 5 }
+
   describe "Hello world" do
     let(:program_name) { "hello_world.str" }
     let(:expected_output) { "Hello world!\n" }
@@ -119,6 +135,13 @@ describe "Running programs" do
   describe "Integer addition" do
     let(:program_name) { "integer_addition.str" }
     let(:expected_output) { "18\n" }
+    it_should_behave_like "a correct program"
+  end
+
+  describe "Read from stdin (gets)" do
+    let(:program_name) { "read_from_stdin.str" }
+    let(:given_input) { "first line\nsecond line\n" }
+    let(:expected_output) { "second line\nfirst line\n" }
     it_should_behave_like "a correct program"
   end
 end

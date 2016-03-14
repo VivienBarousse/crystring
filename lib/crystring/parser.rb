@@ -92,6 +92,11 @@ module Crystring
         ["value"],
         [Statement.new { puts get_variable("value") }]
       )
+      @functions["gets"] = Function.new(
+        @lookup_scopes,
+        [],
+        [Statement.new { Types::String.new(STDIN.readline.gsub(/\n$/, '')) }]
+      )
 
       Types::String.def_method("upcase", Function.new(
         @lookup_scopes,

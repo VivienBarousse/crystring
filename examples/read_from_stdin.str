@@ -1,0 +1,7 @@
+
+a = gets();
+b = gets();
+
+puts(b);
+puts(a);
+
