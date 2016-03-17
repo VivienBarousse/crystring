@@ -149,10 +149,11 @@ module Crystring
       raise "Invalid token #{@token.type}, expected `{`" unless @token.type == Tokenizer::Token::OPENING_CURLY
       next_token
 
-      if type_name == "String"
-        type = Types::String
-      elsif type_name == "Integer"
-        type = Types::Integer
+      if variable_exists?(type_name)
+        type = get_variable(type_name)
+        unless type.is_a?(Class) && type <= Types::Base
+          raise "Unexpected type `#{type_name}`, is a variable, not a type."
+        end
       else
         type = Class.new(Types::Base)
         set_variable(type_name, type)

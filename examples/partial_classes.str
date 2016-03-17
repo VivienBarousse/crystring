@@ -1,0 +1,17 @@
+
+class Foo {
+  def hello() {
+    "hello".upcase();
+  }
+}
+
+class Foo {
+  def world() {
+    "world".upcase();
+  }
+}
+
+foo = Foo.new("");
+puts(foo.hello());
+puts(foo.world());
+

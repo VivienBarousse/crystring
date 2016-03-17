@@ -150,5 +150,11 @@ describe "Running programs" do
     let(:expected_output) { "HELLO WORLD\n" }
     it_should_behave_like "a correct program"
   end
+
+  describe "Partial class declaration" do
+    let(:program_name) { "partial_classes.str" }
+    let(:expected_output) { "HELLO\nWORLD\n" }
+    it_should_behave_like "a correct program"
+  end
 end
 
