@@ -151,8 +151,11 @@ module Crystring
 
       if type_name == "String"
         type = Types::String
+      elsif type_name == "Integer"
+        type = Types::Integer
       else
-        raise "Unknown type `#{type_name}`"
+        type = Class.new(Types::Base)
+        set_variable(type_name, type)
       end
 
       while @token.type == Tokenizer::Token::KEYWORD_DEF

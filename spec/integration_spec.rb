@@ -144,5 +144,11 @@ describe "Running programs" do
     let(:expected_output) { "second line\nfirst line\n" }
     it_should_behave_like "a correct program"
   end
+
+  describe "Custom types" do
+    let(:program_name) { "custom_types.str" }
+    let(:expected_output) { "HELLO WORLD\n" }
+    it_should_behave_like "a correct program"
+  end
 end
 

@@ -1,0 +1,11 @@
+
+class Foo {
+  def a(str) {
+    str.upcase();
+  }
+}
+
+foo = Foo.new("string");
+result = foo.a("hello world");
+puts(result);
+
