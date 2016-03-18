@@ -8,6 +8,13 @@ class String {
 class Foo {
 }
 
+class Hello {
+  def hello() {
+    "Hello!".upcase();
+  }
+}
+
 puts(Foo.new("a").hello());
 puts(Integer.new("1").hello());
+puts(Hello.new("a").hello());
 

@@ -159,7 +159,7 @@ describe "Running programs" do
 
   describe "Method inheritance" do
     let(:program_name) { "method_inheritance.str" }
-    let(:expected_output) { "HELLO WORLD!\nHELLO WORLD!\n" }
+    let(:expected_output) { "HELLO WORLD!\nHELLO WORLD!\nHELLO!\n" }
     it_should_behave_like "a correct program"
   end
 end
