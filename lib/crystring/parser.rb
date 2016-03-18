@@ -155,7 +155,9 @@ module Crystring
           raise "Unexpected type `#{type_name}`, is a variable, not a type."
         end
       else
-        type = Class.new(Types::Base)
+        type = Class.new(Types::Base) do
+          base_class Types::String
+        end
         set_variable(type_name, type)
       end
 

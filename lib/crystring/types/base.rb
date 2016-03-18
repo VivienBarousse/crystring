@@ -7,14 +7,27 @@ module Crystring
       end
 
       def call_method(name, args)
-        raise "Unknown method #{name}" unless self.class.get_method(name)
-        self.class.get_method(name).invoke(args)
+        if self.class.get_method(name)
+          self.class.get_method(name).invoke(args)
+        elsif self.class.base_class
+          self.class.base_class.get_method(name).invoke(args)
+        else
+          raise "Unknown method #{name}"
+        end
       end
 
       def self.call_method(name, args)
         raise "Unknown method #{name}" unless name == "new"
         raise "Invalid number of arguments #{args.count}, expected 1" unless args.count == 1
         new(args.first.to_s)
+      end
+
+      def self.base_class(base_class = nil)
+        if base_class
+          @base_class = base_class
+        else
+          @base_class
+        end
       end
 
       def self.def_method(name, function)
