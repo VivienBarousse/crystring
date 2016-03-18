@@ -140,15 +140,6 @@ module Crystring
       end
     end
 
-    def assert_token(type)
-      t = @token
-      unless @token.type == type
-        raise "Invalid token type #{@token.type}, expected #{type}"
-      end
-      next_token
-      t
-    end
-
     def lookup_type(type_name)
       type = get_variable(type_name)
       unless type.is_a?(Class) && type <= Types::Base
@@ -207,35 +198,30 @@ module Crystring
 
     # "if", "(", expression, ")", "{", [statement], "}"
     def parse_if
-      raise "Invalid token #{@token.type}, expected keyword_if" unless @token.type == Tokenizer::Token::KEYWORD_IF
-      next_token
-      raise "Invalid token #{@token.value}, expected \"(\"" unless @token.type == Tokenizer::Token::OPENING_PAREN
-      next_token
+      assert_token(Tokenizer::Token::KEYWORD_IF)
+      assert_token(Tokenizer::Token::OPENING_PAREN)
 
       value_expression = parse_expression
 
-      raise "Invalid token #{@token.value}, expected \")\"" unless @token.type == Tokenizer::Token::CLOSING_PAREN
-      next_token
+      assert_token(Tokenizer::Token::CLOSING_PAREN)
 
       statements = []
       statements << [value_expression, parse_statements_block]
 
       while @token && @token.type == Tokenizer::Token::KEYWORD_ELSIF
-        raise "Invalid token #{@token.type}, expected keyword_if" unless @token.type == Tokenizer::Token::KEYWORD_ELSIF
-        next_token
-        raise "Invalid token #{@token.value}, expected \"(\"" unless @token.type == Tokenizer::Token::OPENING_PAREN
-        next_token
+        assert_token(Tokenizer::Token::KEYWORD_ELSIF)
+        assert_token(Tokenizer::Token::OPENING_PAREN)
 
         value_expression = parse_expression
 
-        raise "Invalid token #{@token.value}, expected \")\"" unless @token.type == Tokenizer::Token::CLOSING_PAREN
-        next_token
+        assert_token(Tokenizer::Token::CLOSING_PAREN)
 
         statements << [value_expression, parse_statements_block]
       end
 
       if @token && @token.type == Tokenizer::Token::KEYWORD_ELSE
-        next_token
+        assert_token(Tokenizer::Token::KEYWORD_ELSE)
+
         statements << [Expression.new { "true" }, parse_statements_block]
       end
 
@@ -255,15 +241,12 @@ module Crystring
 
     # "while", "(", expression, ")", "{", [statement], "}"
     def parse_while
-      raise "Invalid token #{@token.type}, expected keyword_while" unless @token.type == Tokenizer::Token::KEYWORD_WHILE
-      next_token
-      raise "Invalid token #{@token.value}, expected \"(\"" unless @token.type == Tokenizer::Token::OPENING_PAREN
-      next_token
+      assert_token(Tokenizer::Token::KEYWORD_WHILE)
+      assert_token(Tokenizer::Token::OPENING_PAREN)
 
       value_expression = parse_expression
 
-      raise "Invalid token #{@token.value}, expected \")\"" unless @token.type == Tokenizer::Token::CLOSING_PAREN
-      next_token
+      assert_token(Tokenizer::Token::CLOSING_PAREN)
 
       while_statements = parse_statements_block
 
@@ -275,20 +258,13 @@ module Crystring
     end
 
     def parse_function
-      raise "Invalid token #{@token.type}, expected \"def\"" unless @token.type == Tokenizer::Token::KEYWORD_DEF
-      next_token
-
-      function_name = @token.value
-      raise "Invalid token #{@token.type}, expected identifier" unless @token.type == Tokenizer::Token::IDENTIFIER
-      next_token
-
-      raise "Invalid token #{@token.value}, expected \"(\"" unless @token.type == Tokenizer::Token::OPENING_PAREN
-      next_token
+      assert_token(Tokenizer::Token::KEYWORD_DEF)
+      function_name = assert_token(Tokenizer::Token::IDENTIFIER).value
+      assert_token(Tokenizer::Token::OPENING_PAREN)
 
       formal_params = []
       while @token.type == Tokenizer::Token::IDENTIFIER
-        formal_params << @token.value
-        next_token
+        formal_params << assert_token(Tokenizer::Token::IDENTIFIER).value
 
         if @token.type == Tokenizer::Token::COMMA
           next_token
@@ -299,8 +275,7 @@ module Crystring
         end
       end
 
-      raise "Invalid token #{@token.value}, expected \")\"" unless @token.type == Tokenizer::Token::CLOSING_PAREN
-      next_token
+      assert_token(Tokenizer::Token::CLOSING_PAREN)
 
       statements = parse_statements_block
 
@@ -308,16 +283,14 @@ module Crystring
     end
 
     def parse_statements_block
-      raise "Invalid token #{@token.value}, expected \"{\"" unless @token.type == Tokenizer::Token::OPENING_CURLY
-      next_token
+      assert_token(Tokenizer::Token::OPENING_CURLY)
 
       statements = []
       while @token.type != Tokenizer::Token::CLOSING_CURLY
         statements << parse_statement
       end
 
-      raise "Invalid token #{@token.value}, expected \"}\"" unless @token.type == Tokenizer::Token::CLOSING_CURLY
-      next_token
+      assert_token(Tokenizer::Token::CLOSING_CURLY)
 
       statements
     end
@@ -334,14 +307,16 @@ module Crystring
       end
 
       if @token.type == Tokenizer::Token::EQUALS
-        next_token
+        assert_token(Tokenizer::Token::EQUALS)
+
         lhs = expression
         rhs = parse_value
         expression = Expression.new do
           lhs.evaluate == rhs.evaluate ? "true" : "false"
         end
       elsif @token.type == Tokenizer::Token::PLUS
-        next_token
+        assert_token(Tokenizer::Token::PLUS)
+
         lhs = expression
         rhs = parse_value
         expression = Expression.new do
@@ -352,38 +327,35 @@ module Crystring
           result
         end
       elsif @token.type == Tokenizer::Token::NOT_EQUALS
-        next_token
+        assert_token(Tokenizer::Token::NOT_EQUALS)
+
         lhs = expression
         rhs = parse_value
         expression = Expression.new do
           lhs.evaluate != rhs.evaluate ? "true" : "false"
         end
       elsif @token.type == Tokenizer::Token::ASSIGN
-        raise "Invalid token #{@token.value}, expected \"=\"" unless @token.type == Tokenizer::Token::ASSIGN
-        next_token
-        param = parse_expression
+        assert_token(Tokenizer::Token::ASSIGN)
 
+        param = parse_expression
         return Expression.new do
           v = param.evaluate
           set_variable(expression_name, v)
           v
         end
       elsif @token.type == Tokenizer::Token::OPENING_PAREN
-        raise "Invalid token #{@token.value}, expected \"(\"" unless @token.type == Tokenizer::Token::OPENING_PAREN
-        next_token
+        assert_token(Tokenizer::Token::OPENING_PAREN)
 
         value_expressions = []
         until @token.type == Tokenizer::Token::CLOSING_PAREN
           value_expressions << parse_expression
 
           unless @token.type == Tokenizer::Token::CLOSING_PAREN
-            raise "Invalid token #{@token.value}, expected \",\"" unless @token.type == Tokenizer::Token::COMMA
-            next_token
+            assert_token(Tokenizer::Token::COMMA)
           end
         end
 
-        raise "Invalid token #{@token.value}, expected \")\"" unless @token.type == Tokenizer::Token::CLOSING_PAREN
-        next_token
+        assert_token(Tokenizer::Token::CLOSING_PAREN)
 
         return Expression.new do
           if @functions.has_key?(expression_name)
@@ -395,25 +367,20 @@ module Crystring
         end
       elsif @token.type == Tokenizer::Token::PERIOD
         while @token.type == Tokenizer::Token::PERIOD
-          next_token
-          function_name = @token.value
-          raise "Invalid token #{@token.type}, expected identifier" unless @token.type == Tokenizer::Token::IDENTIFIER
-          next_token
-          raise "Invalid token #{@token.value}, expected \"(\"" unless @token.type == Tokenizer::Token::OPENING_PAREN
-          next_token
+          assert_token(Tokenizer::Token::PERIOD)
+          function_name = assert_token(Tokenizer::Token::IDENTIFIER).value
+          assert_token(Tokenizer::Token::OPENING_PAREN)
 
           value_expressions = []
           until @token.type == Tokenizer::Token::CLOSING_PAREN
             value_expressions << parse_expression
 
             unless @token.type == Tokenizer::Token::CLOSING_PAREN
-              raise "Invalid token #{@token.value}, expected \",\"" unless @token.type == Tokenizer::Token::COMMA
-              next_token
+              assert_token(Tokenizer::Token::COMMA)
             end
           end
 
-          raise "Invalid token #{@token.value}, expected \")\"" unless @token.type == Tokenizer::Token::CLOSING_PAREN
-          next_token
+          assert_token(Tokenizer::Token::CLOSING_PAREN)
 
           expression = Expression.new(function_name, expression, value_expressions) do |f, target, value_expressions|
             value = target.evaluate
@@ -430,16 +397,12 @@ module Crystring
 
     def parse_value
       if @token.type == Tokenizer::Token::STRING_LITERAL
-        value_token = @token
-        raise "Invalid token #{@token.type}, expected string literal" unless @token.type == Tokenizer::Token::STRING_LITERAL
-        next_token
+        value = assert_token(Tokenizer::Token::STRING_LITERAL).value
         Expression.new do
-          Types::String.new(value_token.value)
+          Types::String.new(value)
         end
       elsif @token.type == Tokenizer::Token::IDENTIFIER
-        raise "Invalid token #{@token.type}, expected identifier" unless @token.type == Tokenizer::Token::IDENTIFIER
-        value_token = @token
-        next_token
+        value_token = assert_token(Tokenizer::Token::IDENTIFIER)
         Expression.new do
           raise "Unknown variable '#{value_token.value}'" unless variable_exists?(value_token.value)
           get_variable(value_token.value)
@@ -448,6 +411,15 @@ module Crystring
     end
 
     private
+
+    def assert_token(type)
+      t = @token
+      unless @token.type == type
+        raise "Invalid token type #{@token.type}, expected #{type}"
+      end
+      next_token
+      t
+    end
 
     def next_token
       @token = @tokenizer.next_token
