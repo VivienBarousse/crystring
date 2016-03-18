@@ -394,7 +394,7 @@ module Crystring
           raise "Invalid token #{@token.value}, expected \")\"" unless @token.type == Tokenizer::Token::CLOSING_PAREN
           next_token
 
-          expression = Expression.new(function_name, expression) do |f, target|
+          expression = Expression.new(function_name, expression, value_expressions) do |f, target, value_expressions|
             value = target.evaluate
             @lookup_scopes << value
             result = value.call_method(f, value_expressions.map(&:evaluate))
