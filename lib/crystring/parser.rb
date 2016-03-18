@@ -140,40 +140,41 @@ module Crystring
       end
     end
 
-    def parse_class
-      raise "Invalid token #{@token.type}, expected `class`" unless @token.type == Tokenizer::Token::KEYWORD_CLASS
-      next_token
-      type_name = @token.value
-      raise "Invalid token #{@token.type}, expected identifier" unless @token.type == Tokenizer::Token::IDENTIFIER
-      next_token
-
-      if @token.type == Tokenizer::Token::KEYWORD_EXTENDS
-        raise "Invalid token #{@token.type}, expected `extends`" unless @token.type == Tokenizer::Token::KEYWORD_EXTENDS
-        next_token
-
-        base_type_name = @token.value
-        raise "Invalid token #{@token.type}, expected identifier" unless @token.type == Tokenizer::Token::IDENTIFIER
-        next_token
+    def assert_token(type)
+      t = @token
+      unless @token.type == type
+        raise "Invalid token type #{@token.type}, expected #{type}"
       end
-
-      raise "Invalid token #{@token.type}, expected `{`" unless @token.type == Tokenizer::Token::OPENING_CURLY
       next_token
+      t
+    end
+
+    def lookup_type(type_name)
+      type = get_variable(type_name)
+      unless type.is_a?(Class) && type <= Types::Base
+        raise "Unexpected base type `#{type_name}`, is a variable, not a type."
+      end
+      type
+    end
+
+    def parse_class
+      assert_token(Tokenizer::Token::KEYWORD_CLASS)
+      type_name = assert_token(Tokenizer::Token::IDENTIFIER).value
+      if @token.type == Tokenizer::Token::KEYWORD_EXTENDS
+        assert_token(Tokenizer::Token::KEYWORD_EXTENDS)
+        base_type_name = assert_token(Tokenizer::Token::IDENTIFIER).value
+      end
+      assert_token(Tokenizer::Token::OPENING_CURLY)
 
       if variable_exists?(type_name)
-        type = get_variable(type_name)
-        unless type.is_a?(Class) && type <= Types::Base
-          raise "Unexpected type `#{type_name}`, is a variable, not a type."
-        end
+        type = lookup_type(type_name)
         if base_type_name
           raise "Unexpected `extends` on type redeclaration."
         end
       else
         base_type = Types::String
         if base_type_name
-          base_type = get_variable(base_type_name)
-          unless base_type.is_a?(Class) && base_type <= Types::Base
-            raise "Unexpected base type `#{type_name}`, is a variable, not a type."
-          end
+          base_type = lookup_type(base_type_name)
         end
         type = Class.new(Types::Base) do
           base_class base_type
@@ -186,8 +187,7 @@ module Crystring
         type.def_method(f[0], f[1])
       end
 
-      raise "Invalid token #{@token.type}, expected `}`" unless @token.type == Tokenizer::Token::CLOSING_CURLY
-      next_token
+      assert_token(Tokenizer::Token::CLOSING_CURLY)
     end
 
     # expression, ";"
@@ -198,8 +198,7 @@ module Crystring
 
       expression = parse_expression
 
-      raise "Invalid token #{@token.value}, expected \";\"" unless @token.type == Tokenizer::Token::SEMICOLON
-      next_token
+      assert_token(Tokenizer::Token::SEMICOLON)
 
       return Statement.new do
         expression.evaluate
