@@ -1,0 +1,12 @@
+
+class Foo {
+  def hello() {
+    "HELLO".downcase();
+  }
+}
+
+class Bar extends Foo {
+}
+
+puts(Bar.new("a").hello());
+

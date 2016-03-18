@@ -24,6 +24,7 @@ module Crystring
       KEYWORD_WHILE = 17
       KEYWORD_ELSIF = 18
       PLUS = 19
+      KEYWORD_EXTENDS = 20
 
       attr_reader :type
       attr_reader :value
@@ -66,6 +67,8 @@ module Crystring
           return Token.new(Token::KEYWORD_ELSE, identifier)
         elsif identifier == "class"
           return Token.new(Token::KEYWORD_CLASS, identifier)
+        elsif identifier == "extends"
+          return Token.new(Token::KEYWORD_EXTENDS, identifier)
         elsif identifier == "while"
           return Token.new(Token::KEYWORD_WHILE, identifier)
         end

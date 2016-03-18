@@ -146,6 +146,16 @@ module Crystring
       type_name = @token.value
       raise "Invalid token #{@token.type}, expected identifier" unless @token.type == Tokenizer::Token::IDENTIFIER
       next_token
+
+      if @token.type == Tokenizer::Token::KEYWORD_EXTENDS
+        raise "Invalid token #{@token.type}, expected `extends`" unless @token.type == Tokenizer::Token::KEYWORD_EXTENDS
+        next_token
+
+        base_type_name = @token.value
+        raise "Invalid token #{@token.type}, expected identifier" unless @token.type == Tokenizer::Token::IDENTIFIER
+        next_token
+      end
+
       raise "Invalid token #{@token.type}, expected `{`" unless @token.type == Tokenizer::Token::OPENING_CURLY
       next_token
 
@@ -154,9 +164,19 @@ module Crystring
         unless type.is_a?(Class) && type <= Types::Base
           raise "Unexpected type `#{type_name}`, is a variable, not a type."
         end
+        if base_type_name
+          raise "Unexpected `extends` on type redeclaration."
+        end
       else
+        base_type = Types::String
+        if base_type_name
+          base_type = get_variable(base_type_name)
+          unless base_type.is_a?(Class) && base_type <= Types::Base
+            raise "Unexpected base type `#{type_name}`, is a variable, not a type."
+          end
+        end
         type = Class.new(Types::Base) do
-          base_class Types::String
+          base_class base_type
         end
         set_variable(type_name, type)
       end

@@ -162,5 +162,11 @@ describe "Running programs" do
     let(:expected_output) { "HELLO WORLD!\nHELLO WORLD!\nHELLO!\n" }
     it_should_behave_like "a correct program"
   end
+
+  describe "Class extending another" do
+    let(:program_name) { "class_extends.str" }
+    let(:expected_output) { "hello\n" }
+    it_should_behave_like "a correct program"
+  end
 end
 
