@@ -20,7 +20,7 @@ shared_examples("a correct program") do
   end
 end
 
-describe "Running programs" do
+describe "Feature showcases" do
   let(:given_input) { nil }
   let(:timeout) { 5 }
 
@@ -178,6 +178,43 @@ describe "Running programs" do
   describe "String length" do
     let(:program_name) { "string_length.str" }
     let(:expected_output) { "11\n" }
+    it_should_behave_like "a correct program"
+  end
+end
+
+describe "Complete examples" do
+  let(:given_input) { nil }
+  let(:timeout) { 5 }
+
+  describe "Caesar cypher" do
+    let(:program_name) { "caesar_cypher.str" }
+    let(:expected_output) { "Uryyb Jbeyq\n" + 
+                            "Vszzc Kcfzr\n" + 
+                            "Wtaad Ldgas\n" + 
+                            "Xubbe Mehbt\n" + 
+                            "Yvccf Nficu\n" + 
+                            "Zwddg Ogjdv\n" + 
+                            "Axeeh Phkew\n" + 
+                            "Byffi Qilfx\n" + 
+                            "Czggj Rjmgy\n" + 
+                            "Dahhk Sknhz\n" + 
+                            "Ebiil Tloia\n" + 
+                            "Fcjjm Umpjb\n" + 
+                            "Gdkkn Vnqkc\n" + 
+                            "Hello World\n" + 
+                            "Ifmmp Xpsme\n" + 
+                            "Jgnnq Yqtnf\n" + 
+                            "Khoor Zruog\n" + 
+                            "Lipps Asvph\n" + 
+                            "Mjqqt Btwqi\n" + 
+                            "Nkrru Cuxrj\n" + 
+                            "Olssv Dvysk\n" + 
+                            "Pmttw Ewztl\n" + 
+                            "Qnuux Fxaum\n" + 
+                            "Rovvy Gybvn\n" + 
+                            "Spwwz Hzcwo\n" + 
+                            "Tqxxa Iadxp\n"
+    }
     it_should_behave_like "a correct program"
   end
 end

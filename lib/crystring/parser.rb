@@ -118,6 +118,16 @@ module Crystring
         [],
         [Statement.new { Types::Integer.new(get_variable("self").to_s.length) }]
       ))
+      Types::String.def_method("get_char", Function.new(
+        @lookup_scopes,
+        ["idx"],
+        [Statement.new { Types::String.new(get_variable("self").to_s[Integer(get_variable("idx").to_s)]) }]
+      ))
+      Types::String.def_method("tr", Function.new(
+        @lookup_scopes,
+        ["sub", "ptn"],
+        [Statement.new { Types::String.new(get_variable("self").to_s.tr(get_variable("sub").to_s, get_variable("ptn").to_s)) }]
+      ))
 
       Types::Integer.def_method("+", Function.new(
         @lookup_scopes,

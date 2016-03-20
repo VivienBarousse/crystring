@@ -1,0 +1,39 @@
+
+class String {
+  def rotate(offset) {
+    str = "";
+    one = Integer.new("1");
+    i = offset;
+    l = self.length();
+    while (i != l) {
+      c = self.get_char(i);
+      str = str + c;
+      i = i + one;
+    }
+    i = Integer.new("0");
+    while (i != offset) {
+      c = self.get_char(i);
+      str = str + c;
+      i = i + one;
+    }
+    str;
+  }
+}
+
+cypher = "Uryyb Jbeyq";
+substitution = "abcdefghijklmnopqrstuvwxyz";
+
+i = Integer.new("0");
+limit = substitution.length();
+one = Integer.new("1");
+while (i != limit) {
+  pattern = substitution.rotate(i);
+  uppercase_substitution = substitution.upcase();
+  uppercase_pattern = pattern.upcase();
+  complete_substitution = substitution + uppercase_substitution;
+  complete_pattern = pattern + uppercase_pattern;
+  a = cypher.tr(complete_substitution, complete_pattern);
+  puts(a);
+  i = i + one;
+}
+
