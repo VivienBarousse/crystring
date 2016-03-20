@@ -98,6 +98,11 @@ module Crystring
         [Statement.new { Types::String.new(STDIN.readline.gsub(/\n$/, '')) }]
       )
 
+      Types::String.def_method("+", Function.new(
+        @lookup_scopes,
+        ["a"],
+        [Statement.new { Types::String.new(get_variable("self").to_s + get_variable("a").to_s) }]
+      ))
       Types::String.def_method("upcase", Function.new(
         @lookup_scopes,
         [],

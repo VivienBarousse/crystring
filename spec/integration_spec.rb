@@ -168,5 +168,11 @@ describe "Running programs" do
     let(:expected_output) { "hello\n" }
     it_should_behave_like "a correct program"
   end
+
+  describe "String concatenation" do
+    let(:program_name) { "string_concat.str" }
+    let(:expected_output) { "HELLO WORLD\n" }
+    it_should_behave_like "a correct program"
+  end
 end
 
