@@ -41,7 +41,7 @@ module Crystring
       end
 
       def to_s
-        @str
+        @str.to_s
       end
 
       def ==(other)

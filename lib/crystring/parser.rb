@@ -113,6 +113,11 @@ module Crystring
         [],
         [Statement.new { Types::String.new(get_variable("self").downcase) }]
       ))
+      Types::String.def_method("length", Function.new(
+        @lookup_scopes,
+        [],
+        [Statement.new { Types::Integer.new(get_variable("self").length) }]
+      ))
 
       Types::Integer.def_method("+", Function.new(
         @lookup_scopes,

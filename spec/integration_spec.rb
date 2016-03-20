@@ -174,5 +174,11 @@ describe "Running programs" do
     let(:expected_output) { "HELLO WORLD\n" }
     it_should_behave_like "a correct program"
   end
+
+  describe "String length" do
+    let(:program_name) { "string_length.str" }
+    let(:expected_output) { "11\n" }
+    it_should_behave_like "a correct program"
+  end
 end
 
