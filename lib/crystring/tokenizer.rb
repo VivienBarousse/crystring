@@ -52,7 +52,7 @@ module Crystring
 
       if @char && (@char >= 'a' && @char <= 'z' || @char >= 'A' && @char <= 'Z')
         identifier = ""
-        while @char && (@char >= 'a' && @char <= 'z' || @char >= 'A' && @char <= 'Z')
+        while @char && ((@char >= 'a' && @char <= 'z' || @char >= 'A' && @char <= 'Z') || @char == '_')
           identifier << @char
           next_char
         end

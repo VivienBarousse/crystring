@@ -10,6 +10,14 @@ describe Crystring::Tokenizer do
       expect(subject.next_token).to eq(Crystring::Tokenizer::Token.new(Crystring::Tokenizer::Token::IDENTIFIER, "abc"))
       expect(subject.next_token).to eq(Crystring::Tokenizer::Token.new(Crystring::Tokenizer::Token::IDENTIFIER, "efg"))
     end
+
+    describe "with underscores" do
+      let(:code) { "abc_efg" }
+
+      it "should include underscores in identifiers" do
+        expect(subject.next_token).to eq(Crystring::Tokenizer::Token.new(Crystring::Tokenizer::Token::IDENTIFIER, "abc_efg"))
+      end
+    end
   end
 
   describe "keywords" do
