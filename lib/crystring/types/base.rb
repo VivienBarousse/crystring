@@ -54,7 +54,7 @@ module Crystring
       end
 
       def get_variable(name)
-        return @str if name == "self"
+        return self.class.new(@str) if name == "self"
         @variables[name]
       end
 

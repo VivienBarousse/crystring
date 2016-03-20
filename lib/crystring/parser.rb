@@ -106,17 +106,17 @@ module Crystring
       Types::String.def_method("upcase", Function.new(
         @lookup_scopes,
         [],
-        [Statement.new { Types::String.new(get_variable("self").upcase) }]
+        [Statement.new { Types::String.new(get_variable("self").to_s.upcase) }]
       ))
       Types::String.def_method("downcase", Function.new(
         @lookup_scopes,
         [],
-        [Statement.new { Types::String.new(get_variable("self").downcase) }]
+        [Statement.new { Types::String.new(get_variable("self").to_s.downcase) }]
       ))
       Types::String.def_method("length", Function.new(
         @lookup_scopes,
         [],
-        [Statement.new { Types::Integer.new(get_variable("self").length) }]
+        [Statement.new { Types::Integer.new(get_variable("self").to_s.length) }]
       ))
 
       Types::Integer.def_method("+", Function.new(
