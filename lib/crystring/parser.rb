@@ -1,142 +1,9 @@
 module Crystring
   class Parser
 
-    class DefaultLookupScope
-      def initialize
-        @variables = {}
-      end
-
-      def variable_exists?(name)
-        @variables.has_key?(name)
-      end
-
-      def get_variable(name)
-        @variables[name]
-      end
-
-      def set_variable(name, value)
-        @variables[name] = value
-      end
-    end
-
-    class Statement
-      def initialize(*args, &block)
-        @args = args
-        @block = block
-      end
-
-      def invoke
-        @block.call(*@args)
-      end
-    end
-
-    class Expression
-      def initialize(*args, &block)
-        @args = args
-        @block = block
-      end
-
-      def evaluate
-        @block.call(*@args)
-      end
-    end
-
-    class Function
-      def initialize(lookup_scopes, formal_params, statements)
-        @lookup_scopes = lookup_scopes
-        @formal_params = formal_params
-        @statements = statements
-        @variables = {}
-      end
-
-      def invoke(actual_params)
-        unless @formal_params.length == actual_params.length
-          raise "Invalid cardinality for function: expected #{@formal_params.length} arguments, got #{actual_params.length}"
-        end
-        @formal_params.length.times do |i|
-          @variables[@formal_params[i]] = actual_params[i]
-        end
-        begin
-          @lookup_scopes << self
-          value = nil
-          @statements.each do |s|
-            value = s.invoke
-          end
-          value
-        ensure
-          @lookup_scopes.pop
-        end
-      end
-
-      def variable_exists?(name)
-        @variables.has_key?(name)
-      end
-
-      def get_variable(name)
-        @variables[name]
-      end
-
-      def set_variable(name, value)
-        @variables[name] = value
-      end
-    end
-
     def initialize(tokenizer)
       @tokenizer = tokenizer
-      @variables = {}
-      @functions = {}
-      @lookup_scopes = [DefaultLookupScope.new]
-
-      @functions["puts"] = Function.new(
-        @lookup_scopes,
-        ["value"],
-        [Statement.new { puts get_variable("value") }]
-      )
-      @functions["gets"] = Function.new(
-        @lookup_scopes,
-        [],
-        [Statement.new { Types::String.new(STDIN.readline.gsub(/\n$/, '')) }]
-      )
-
-      Types::String.def_method("+", Function.new(
-        @lookup_scopes,
-        ["a"],
-        [Statement.new { Types::String.new(get_variable("self").to_s + get_variable("a").to_s) }]
-      ))
-      Types::String.def_method("upcase", Function.new(
-        @lookup_scopes,
-        [],
-        [Statement.new { Types::String.new(get_variable("self").to_s.upcase) }]
-      ))
-      Types::String.def_method("downcase", Function.new(
-        @lookup_scopes,
-        [],
-        [Statement.new { Types::String.new(get_variable("self").to_s.downcase) }]
-      ))
-      Types::String.def_method("length", Function.new(
-        @lookup_scopes,
-        [],
-        [Statement.new { Types::Integer.new(get_variable("self").to_s.length) }]
-      ))
-      Types::String.def_method("get_char", Function.new(
-        @lookup_scopes,
-        ["idx"],
-        [Statement.new { Types::String.new(get_variable("self").to_s[Integer(get_variable("idx").to_s)]) }]
-      ))
-      Types::String.def_method("tr", Function.new(
-        @lookup_scopes,
-        ["sub", "ptn"],
-        [Statement.new { Types::String.new(get_variable("self").to_s.tr(get_variable("sub").to_s, get_variable("ptn").to_s)) }]
-      ))
-
-      Types::Integer.def_method("+", Function.new(
-        @lookup_scopes,
-        ["a"],
-        [Statement.new { Types::Integer.new((Integer(get_variable("self").to_s) + Integer(get_variable("a").to_s)).to_s) }]
-      ))
-
-      set_variable("Integer", Types::Integer)
-      set_variable("String", Types::String)
+      @syntax_tree = SyntaxTree.new
 
       next_token
     end
@@ -147,7 +14,7 @@ module Crystring
           parse_statement.invoke
         elsif @token.type == Tokenizer::Token::KEYWORD_DEF
           f = parse_function
-          @functions[f[0]] = f[1]
+          @syntax_tree.set_function(f[0], f[1])
         elsif @token.type == Tokenizer::Token::KEYWORD_IF
           parse_if.invoke
         elsif @token.type == Tokenizer::Token::KEYWORD_WHILE
@@ -160,14 +27,6 @@ module Crystring
       end
     end
 
-    def lookup_type(type_name)
-      type = get_variable(type_name)
-      unless type.is_a?(Class) && type <= Types::Base
-        raise "Unexpected base type `#{type_name}`, is a variable, not a type."
-      end
-      type
-    end
-
     def parse_class
       assert_token(Tokenizer::Token::KEYWORD_CLASS)
       type_name = assert_token(Tokenizer::Token::IDENTIFIER).value
@@ -177,20 +36,20 @@ module Crystring
       end
       assert_token(Tokenizer::Token::OPENING_CURLY)
 
-      if variable_exists?(type_name)
-        type = lookup_type(type_name)
+      if @syntax_tree.variable_exists?(type_name)
+        type = @syntax_tree.lookup_type(type_name)
         if base_type_name
           raise "Unexpected `extends` on type redeclaration."
         end
       else
         base_type = Types::String
         if base_type_name
-          base_type = lookup_type(base_type_name)
+          base_type = @syntax_tree.lookup_type(base_type_name)
         end
         type = Class.new(Types::Base) do
           base_class base_type
         end
-        set_variable(type_name, type)
+        @syntax_tree.set_variable(type_name, type)
       end
 
       while @token.type == Tokenizer::Token::KEYWORD_DEF
@@ -214,7 +73,7 @@ module Crystring
 
       assert_token(Tokenizer::Token::SEMICOLON)
 
-      return Statement.new do
+      return SyntaxTree::Statement.new do
         expression.evaluate
       end
     end
@@ -245,10 +104,10 @@ module Crystring
       if @token && @token.type == Tokenizer::Token::KEYWORD_ELSE
         assert_token(Tokenizer::Token::KEYWORD_ELSE)
 
-        statements << [Expression.new { "true" }, parse_statements_block]
+        statements << [SyntaxTree::Expression.new { "true" }, parse_statements_block]
       end
 
-      return Statement.new(statements) do |statements|
+      return SyntaxTree::Statement.new(statements) do |statements|
         statements.each do |expression, statements|
           case expression.evaluate
           when "true"
@@ -273,7 +132,7 @@ module Crystring
 
       while_statements = parse_statements_block
 
-      return Statement.new do
+      return SyntaxTree::Statement.new do
         while value_expression.evaluate == "true"
           while_statements.each(&:invoke)
         end
@@ -302,7 +161,7 @@ module Crystring
 
       statements = parse_statements_block
 
-      return [function_name, Function.new(@lookup_scopes, formal_params, statements)]
+      return [function_name, SyntaxTree::Function.new(@syntax_tree, formal_params, statements)]
     end
 
     def parse_statements_block
@@ -334,7 +193,7 @@ module Crystring
 
         lhs = expression
         rhs = parse_value
-        expression = Expression.new do
+        expression = SyntaxTree::Expression.new do
           lhs.evaluate == rhs.evaluate ? "true" : "false"
         end
       elsif @token.type == Tokenizer::Token::PLUS
@@ -342,28 +201,27 @@ module Crystring
 
         lhs = expression
         rhs = parse_value
-        expression = Expression.new do
+        expression = SyntaxTree::Expression.new do
           value = lhs.evaluate
-          @lookup_scopes << value
-          result = value.call_method("+", [rhs.evaluate])
-          @lookup_scopes.pop
-          result
+          @syntax_tree.with_lookup_scope(value) do
+            value.call_method("+", [rhs.evaluate])
+          end
         end
       elsif @token.type == Tokenizer::Token::NOT_EQUALS
         assert_token(Tokenizer::Token::NOT_EQUALS)
 
         lhs = expression
         rhs = parse_value
-        expression = Expression.new do
+        expression = SyntaxTree::Expression.new do
           lhs.evaluate != rhs.evaluate ? "true" : "false"
         end
       elsif @token.type == Tokenizer::Token::ASSIGN
         assert_token(Tokenizer::Token::ASSIGN)
 
         param = parse_expression
-        return Expression.new do
+        return SyntaxTree::Expression.new do
           v = param.evaluate
-          set_variable(expression_name, v)
+          @syntax_tree.set_variable(expression_name, v)
           v
         end
       elsif @token.type == Tokenizer::Token::OPENING_PAREN
@@ -380,13 +238,8 @@ module Crystring
 
         assert_token(Tokenizer::Token::CLOSING_PAREN)
 
-        return Expression.new do
-          if @functions.has_key?(expression_name)
-            params = value_expressions.map(&:evaluate)
-            @functions[expression_name].invoke(params)
-          else
-            raise "Unknown function #{expression_name}"
-          end
+        return SyntaxTree::Expression.new do
+          @syntax_tree.call_function(expression_name, value_expressions)
         end
       elsif @token.type == Tokenizer::Token::PERIOD
         while @token.type == Tokenizer::Token::PERIOD
@@ -405,12 +258,11 @@ module Crystring
 
           assert_token(Tokenizer::Token::CLOSING_PAREN)
 
-          expression = Expression.new(function_name, expression, value_expressions) do |f, target, value_expressions|
+          expression = SyntaxTree::Expression.new(function_name, expression, value_expressions) do |f, target, value_expressions|
             value = target.evaluate
-            @lookup_scopes << value
-            result = value.call_method(f, value_expressions.map(&:evaluate))
-            @lookup_scopes.pop
-            result
+            @syntax_tree.with_lookup_scope(value) do
+              value.call_method(f, value_expressions.map(&:evaluate))
+            end
           end
         end
       end
@@ -421,14 +273,14 @@ module Crystring
     def parse_value
       if @token.type == Tokenizer::Token::STRING_LITERAL
         value = assert_token(Tokenizer::Token::STRING_LITERAL).value
-        Expression.new do
+        SyntaxTree::Expression.new do
           Types::String.new(value)
         end
       elsif @token.type == Tokenizer::Token::IDENTIFIER
         value_token = assert_token(Tokenizer::Token::IDENTIFIER)
-        Expression.new do
-          raise "Unknown variable '#{value_token.value}'" unless variable_exists?(value_token.value)
-          get_variable(value_token.value)
+        SyntaxTree::Expression.new do
+          raise "Unknown variable '#{value_token.value}'" unless @syntax_tree.variable_exists?(value_token.value)
+          @syntax_tree.get_variable(value_token.value)
         end
       end
     end
@@ -446,19 +298,6 @@ module Crystring
 
     def next_token
       @token = @tokenizer.next_token
-    end
-
-    def variable_exists?(name)
-      @lookup_scopes.any? { |s| s.variable_exists?(name) }
-    end
-
-    def get_variable(name)
-      scope = @lookup_scopes.reverse.detect { |s| s.variable_exists?(name) }
-      scope.get_variable(name)
-    end
-
-    def set_variable(name, value)
-      @lookup_scopes.last.set_variable(name, value)
     end
   end
 end
