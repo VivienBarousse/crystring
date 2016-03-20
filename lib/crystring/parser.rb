@@ -196,6 +196,9 @@ module Crystring
       if @token.type == Tokenizer::Token::KEYWORD_IF
         return parse_if
       end
+      if @token.type == Tokenizer::Token::KEYWORD_WHILE
+        return parse_while
+      end
 
       expression = parse_expression
 
