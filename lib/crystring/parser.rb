@@ -200,7 +200,7 @@ module Crystring
         assert_token(Tokenizer::Token::PLUS)
 
         lhs = expression
-        rhs = parse_value
+        rhs = parse_expression
         expression = SyntaxTree::Expression.new do
           value = lhs.evaluate
           @syntax_tree.with_lookup_scope(value) do

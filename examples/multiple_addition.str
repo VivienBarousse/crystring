@@ -1,0 +1,4 @@
+
+hello = "H" + "e" + "l" + "l" + "o";
+puts(hello);
+

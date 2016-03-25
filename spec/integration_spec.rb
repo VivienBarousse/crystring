@@ -180,6 +180,12 @@ describe "Feature showcases" do
     let(:expected_output) { "11\n" }
     it_should_behave_like "a correct program"
   end
+
+  describe "Chained additions" do
+    let(:program_name) { "multiple_addition.str" }
+    let(:expected_output) { "Hello\n" }
+    it_should_behave_like "a correct program"
+  end
 end
 
 describe "Complete examples" do
