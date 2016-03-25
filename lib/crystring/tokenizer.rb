@@ -5,26 +5,26 @@ module Crystring
     end
 
     class Token
-      STRING_LITERAL = 1
-      OPENING_PAREN = 2
-      CLOSING_PAREN = 3
-      SEMICOLON = 4
-      IDENTIFIER = 5
-      ASSIGN = 6
-      KEYWORD_DEF = 7
-      OPENING_CURLY = 8
-      CLOSING_CURLY = 9
-      EQUALS = 10
-      NOT_EQUALS = 11
-      KEYWORD_IF = 12
-      KEYWORD_ELSE = 13
-      COMMA = 14
-      PERIOD = 15
-      KEYWORD_CLASS = 16
-      KEYWORD_WHILE = 17
-      KEYWORD_ELSIF = 18
-      PLUS = 19
-      KEYWORD_EXTENDS = 20
+      STRING_LITERAL = :string_literal
+      OPENING_PAREN = :opening_paren
+      CLOSING_PAREN = :closing_paren
+      OPENING_CURLY = :opening_curly
+      CLOSING_CURLY = :closing_curly
+      SEMICOLON = :semicolon
+      IDENTIFIER = :identifier
+      ASSIGN = :assign
+      EQUALS = :equals
+      NOT_EQUALS = :not_equals
+      COMMA = :comma
+      PERIOD = :period
+      PLUS = :plus
+      KEYWORD_CLASS = :keyword_class
+      KEYWORD_DEF = :keyword_def
+      KEYWORD_ELSE = :keyword_else
+      KEYWORD_ELSIF = :keyword_elsif
+      KEYWORD_EXTENDS = :keyword_extends
+      KEYWORD_IF = :keyword_if
+      KEYWORD_WHILE = :keyword_while
 
       attr_reader :type
       attr_reader :value
