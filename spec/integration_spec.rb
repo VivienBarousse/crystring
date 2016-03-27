@@ -192,6 +192,12 @@ describe "Feature showcases" do
     let(:expected_output) { "HELLO world\n" }
     it_should_behave_like "a correct program"
   end
+
+  describe "Complex expressions" do
+    let(:program_name) { "complex_expressions.str" }
+    let(:expected_output) { "true\nfalse\n" }
+    it_should_behave_like "a correct program"
+  end
 end
 
 describe "Complete examples" do

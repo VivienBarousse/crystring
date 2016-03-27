@@ -1,0 +1,9 @@
+
+def hello() {
+  "Hello";
+}
+
+puts(hello().upcase() + " " + "World".downcase() == "HELLO".upcase() + " ".downcase() + "world");
+bool = hello().upcase() + " " + "World".downcase() != "HELLO".upcase() + " ".downcase() + "world";
+puts(bool);
+

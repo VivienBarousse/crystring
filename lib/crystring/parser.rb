@@ -183,7 +183,7 @@ module Crystring
         if @token.type == Tokenizer::Token::IDENTIFIER
           expression_name = @token.value
         end
-        expression = parse_value
+        expression = parse_addition
       else
         raise "Invalid token #{@token.type}, expected expression"
       end
@@ -192,26 +192,15 @@ module Crystring
         assert_token(Tokenizer::Token::EQUALS)
 
         lhs = expression
-        rhs = parse_value
+        rhs = parse_addition
         expression = SyntaxTree::Expression.new do
           lhs.evaluate == rhs.evaluate ? "true" : "false"
-        end
-      elsif @token.type == Tokenizer::Token::PLUS
-        assert_token(Tokenizer::Token::PLUS)
-
-        lhs = expression
-        rhs = parse_expression
-        expression = SyntaxTree::Expression.new do
-          value = lhs.evaluate
-          @syntax_tree.with_lookup_scope(value) do
-            value.call_method("+", [rhs.evaluate])
-          end
         end
       elsif @token.type == Tokenizer::Token::NOT_EQUALS
         assert_token(Tokenizer::Token::NOT_EQUALS)
 
         lhs = expression
-        rhs = parse_value
+        rhs = parse_addition
         expression = SyntaxTree::Expression.new do
           lhs.evaluate != rhs.evaluate ? "true" : "false"
         end
@@ -219,31 +208,31 @@ module Crystring
         assert_token(Tokenizer::Token::ASSIGN)
 
         param = parse_expression
-        return SyntaxTree::Expression.new do
+        expression = SyntaxTree::Expression.new do
           v = param.evaluate
           @syntax_tree.set_variable(expression_name, v)
           v
         end
-      elsif @token.type == Tokenizer::Token::OPENING_PAREN
-        assert_token(Tokenizer::Token::OPENING_PAREN)
-
-        value_expressions = []
-        until @token.type == Tokenizer::Token::CLOSING_PAREN
-          value_expressions << parse_expression
-
-          unless @token.type == Tokenizer::Token::CLOSING_PAREN
-            assert_token(Tokenizer::Token::COMMA)
-          end
-        end
-
-        assert_token(Tokenizer::Token::CLOSING_PAREN)
-
-        return SyntaxTree::Expression.new do
-          @syntax_tree.call_function(expression_name, value_expressions)
-        end
       end
 
       expression
+    end
+
+    def parse_addition
+      lhs = parse_value
+      if @token.type == Tokenizer::Token::PLUS
+        assert_token(Tokenizer::Token::PLUS)
+
+        rhs = parse_addition
+        SyntaxTree::Expression.new do
+          value = lhs.evaluate
+          @syntax_tree.with_lookup_scope(value) do
+            value.call_method("+", [rhs.evaluate])
+          end
+        end
+      else
+        lhs
+      end
     end
 
     def parse_value
@@ -257,6 +246,25 @@ module Crystring
         SyntaxTree::Expression.new do
           raise "Unknown variable '#{value_token.value}'" unless @syntax_tree.variable_exists?(value_token.value)
           @syntax_tree.get_variable(value_token.value)
+        end
+      end
+
+      if @token.type == Tokenizer::Token::OPENING_PAREN
+        assert_token(Tokenizer::Token::OPENING_PAREN)
+
+        value_expressions = []
+        until @token.type == Tokenizer::Token::CLOSING_PAREN
+          value_expressions << parse_expression
+
+          unless @token.type == Tokenizer::Token::CLOSING_PAREN
+            assert_token(Tokenizer::Token::COMMA)
+          end
+        end
+
+        assert_token(Tokenizer::Token::CLOSING_PAREN)
+
+        expression = SyntaxTree::Expression.new do
+          @syntax_tree.call_function(value_token.value, value_expressions)
         end
       end
 
