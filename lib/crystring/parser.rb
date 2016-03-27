@@ -241,7 +241,26 @@ module Crystring
         return SyntaxTree::Expression.new do
           @syntax_tree.call_function(expression_name, value_expressions)
         end
-      elsif @token.type == Tokenizer::Token::PERIOD
+      end
+
+      expression
+    end
+
+    def parse_value
+      expression = if @token.type == Tokenizer::Token::STRING_LITERAL
+        value = assert_token(Tokenizer::Token::STRING_LITERAL).value
+        SyntaxTree::Expression.new do
+          Types::String.new(value)
+        end
+      elsif @token.type == Tokenizer::Token::IDENTIFIER
+        value_token = assert_token(Tokenizer::Token::IDENTIFIER)
+        SyntaxTree::Expression.new do
+          raise "Unknown variable '#{value_token.value}'" unless @syntax_tree.variable_exists?(value_token.value)
+          @syntax_tree.get_variable(value_token.value)
+        end
+      end
+
+      if @token.type == Tokenizer::Token::PERIOD
         while @token.type == Tokenizer::Token::PERIOD
           assert_token(Tokenizer::Token::PERIOD)
           function_name = assert_token(Tokenizer::Token::IDENTIFIER).value
@@ -266,23 +285,7 @@ module Crystring
           end
         end
       end
-
       expression
-    end
-
-    def parse_value
-      if @token.type == Tokenizer::Token::STRING_LITERAL
-        value = assert_token(Tokenizer::Token::STRING_LITERAL).value
-        SyntaxTree::Expression.new do
-          Types::String.new(value)
-        end
-      elsif @token.type == Tokenizer::Token::IDENTIFIER
-        value_token = assert_token(Tokenizer::Token::IDENTIFIER)
-        SyntaxTree::Expression.new do
-          raise "Unknown variable '#{value_token.value}'" unless @syntax_tree.variable_exists?(value_token.value)
-          @syntax_tree.get_variable(value_token.value)
-        end
-      end
     end
 
     private

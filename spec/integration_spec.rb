@@ -186,6 +186,12 @@ describe "Feature showcases" do
     let(:expected_output) { "Hello\n" }
     it_should_behave_like "a correct program"
   end
+
+  describe "Concatenated method calls" do
+    let(:program_name) { "concat_method_calls.str" }
+    let(:expected_output) { "HELLO world\n" }
+    it_should_behave_like "a correct program"
+  end
 end
 
 describe "Complete examples" do
