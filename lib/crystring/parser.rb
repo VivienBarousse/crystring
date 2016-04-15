@@ -109,7 +109,7 @@ module Crystring
 
       return SyntaxTree::Statement.new(statements) do |statements|
         statements.each do |expression, statements|
-          case expression.evaluate
+          case expression.evaluate.to_s
           when "true"
             statements.each(&:invoke)
             break
@@ -194,7 +194,11 @@ module Crystring
         lhs = expression
         rhs = parse_addition
         expression = SyntaxTree::Expression.new do
-          lhs.evaluate == rhs.evaluate ? "true" : "false"
+          value = lhs.evaluate
+          args = [rhs.evaluate]
+          @syntax_tree.with_lookup_scope(value) do
+            value.call_method("==", args)
+          end
         end
       elsif @token.type == Tokenizer::Token::NOT_EQUALS
         assert_token(Tokenizer::Token::NOT_EQUALS)
@@ -202,7 +206,11 @@ module Crystring
         lhs = expression
         rhs = parse_addition
         expression = SyntaxTree::Expression.new do
-          lhs.evaluate != rhs.evaluate ? "true" : "false"
+          value = lhs.evaluate
+          args = [rhs.evaluate]
+          @syntax_tree.with_lookup_scope(value) do
+            value.call_method("!=", args)
+          end
         end
       elsif @token.type == Tokenizer::Token::ASSIGN
         assert_token(Tokenizer::Token::ASSIGN)

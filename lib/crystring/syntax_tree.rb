@@ -99,6 +99,16 @@ module Crystring
         ["a"],
         [Statement.new { Types::String.new(get_variable("self").to_s + get_variable("a").to_s) }]
       ))
+      Types::String.def_method("==", Function.new(
+        self,
+        ["a"],
+        [Statement.new { Types::String.new(get_variable("self").to_s == get_variable("a").to_s ? "true" : "false") }]
+      ))
+      Types::String.def_method("!=", Function.new(
+        self,
+        ["a"],
+        [Statement.new { Types::String.new(get_variable("self").to_s != get_variable("a").to_s ? "true" : "false") }]
+      ))
       Types::String.def_method("upcase", Function.new(
         self,
         [],
