@@ -129,6 +129,11 @@ module Crystring
         ["sub", "ptn"],
         [Statement.new { Types::String.new(get_variable("self").to_s.tr(get_variable("sub").to_s, get_variable("ptn").to_s)) }]
       ))
+      Types::String.def_method("to_s", Function.new(
+        self,
+        [],
+        [Statement.new { Types::String.new(get_variable("self").to_s) }]
+      ))
 
       Types::Integer.def_method("+", Function.new(
         self,

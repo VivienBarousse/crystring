@@ -164,6 +164,12 @@ module Crystring
       assert_token(Tokenizer::Token::KEYWORD_DEF)
       function_name = assert_token(
           Tokenizer::Token::IDENTIFIER,
+          Tokenizer::Token::TIMES,
+          Tokenizer::Token::PLUS,
+          Tokenizer::Token::DIVIDES,
+          Tokenizer::Token::MODULUS,
+          Tokenizer::Token::LOWER_THAN,
+          Tokenizer::Token::GREATER_THAN,
           Tokenizer::Token::NOT_EQUALS,
       ).value
       assert_token(Tokenizer::Token::OPENING_PAREN)
@@ -203,7 +209,7 @@ module Crystring
 
     def parse_expression
       case @token.type
-      when Tokenizer::Token::STRING_LITERAL, Tokenizer::Token::IDENTIFIER
+      when Tokenizer::Token::STRING_LITERAL, Tokenizer::Token::IDENTIFIER, Tokenizer::Token::OPENING_PAREN
         if @token.type == Tokenizer::Token::IDENTIFIER
           expression_name = @token.value
         end
@@ -236,6 +242,30 @@ module Crystring
             value.call_method("!=", args)
           end
         end
+      elsif @token.type == Tokenizer::Token::LOWER_THAN
+        assert_token(Tokenizer::Token::LOWER_THAN)
+
+        lhs = expression
+        rhs = parse_addition
+        expression = SyntaxTree::Expression.new do
+          value = lhs.evaluate
+          args = [rhs.evaluate]
+          @syntax_tree.with_lookup_scope(value) do
+            value.call_method("<", args)
+          end
+        end
+      elsif @token.type == Tokenizer::Token::GREATER_THAN
+        assert_token(Tokenizer::Token::GREATER_THAN)
+
+        lhs = expression
+        rhs = parse_addition
+        expression = SyntaxTree::Expression.new do
+          value = lhs.evaluate
+          args = [rhs.evaluate]
+          @syntax_tree.with_lookup_scope(value) do
+            value.call_method(">", args)
+          end
+        end
       elsif @token.type == Tokenizer::Token::ASSIGN
         assert_token(Tokenizer::Token::ASSIGN)
 
@@ -251,15 +281,56 @@ module Crystring
     end
 
     def parse_addition
-      lhs = parse_value
+      lhs = parse_multiplication
       if @token.type == Tokenizer::Token::PLUS
         assert_token(Tokenizer::Token::PLUS)
 
         rhs = parse_addition
         SyntaxTree::Expression.new do
           value = lhs.evaluate
+          args = [rhs.evaluate]
           @syntax_tree.with_lookup_scope(value) do
-            value.call_method("+", [rhs.evaluate])
+            value.call_method("+", args)
+          end
+        end
+      else
+        lhs
+      end
+    end
+
+    def parse_multiplication
+      lhs = parse_value
+      if @token.type == Tokenizer::Token::TIMES
+        assert_token(Tokenizer::Token::TIMES)
+
+        rhs = parse_multiplication
+        SyntaxTree::Expression.new do
+          value = lhs.evaluate
+          args = [rhs.evaluate]
+          @syntax_tree.with_lookup_scope(value) do
+            value.call_method("*", args)
+          end
+        end
+      elsif @token.type == Tokenizer::Token::DIVIDES
+        assert_token(Tokenizer::Token::DIVIDES)
+
+        rhs = parse_multiplication
+        SyntaxTree::Expression.new do
+          value = lhs.evaluate
+          args = [rhs.evaluate]
+          @syntax_tree.with_lookup_scope(value) do
+            value.call_method("/", args)
+          end
+        end
+      elsif @token.type == Tokenizer::Token::MODULUS
+        assert_token(Tokenizer::Token::MODULUS)
+
+        rhs = parse_multiplication
+        SyntaxTree::Expression.new do
+          value = lhs.evaluate
+          args = [rhs.evaluate]
+          @syntax_tree.with_lookup_scope(value) do
+            value.call_method("%", args)
           end
         end
       else
@@ -279,6 +350,11 @@ module Crystring
           raise "Unknown variable '#{value_token.value}'" unless @syntax_tree.variable_exists?(value_token.value)
           @syntax_tree.get_variable(value_token.value)
         end
+      elsif @token.type == Tokenizer::Token::OPENING_PAREN
+        assert_token(Tokenizer::Token::OPENING_PAREN)
+        e = parse_expression
+        assert_token(Tokenizer::Token::CLOSING_PAREN)
+        e
       end
 
       if @token.type == Tokenizer::Token::OPENING_PAREN
@@ -319,8 +395,9 @@ module Crystring
 
           expression = SyntaxTree::Expression.new(function_name, expression, value_expressions) do |f, target, value_expressions|
             value = target.evaluate
+            arguments = value_expressions.map(&:evaluate)
             @syntax_tree.with_lookup_scope(value) do
-              value.call_method(f, value_expressions.map(&:evaluate))
+              value.call_method(f, arguments)
             end
           end
         end

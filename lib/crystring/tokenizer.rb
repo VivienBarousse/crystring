@@ -15,9 +15,14 @@ module Crystring
       ASSIGN = :assign
       EQUALS = :equals
       NOT_EQUALS = :not_equals
+      LOWER_THAN = :lower_than
+      GREATER_THAN = :greater_than
       COMMA = :comma
       PERIOD = :period
       PLUS = :plus
+      TIMES = :times
+      DIVIDES = :divides
+      MODULUS = :modulus
       KEYWORD_CLASS = :keyword_class
       KEYWORD_DEF = :keyword_def
       KEYWORD_ELSE = :keyword_else
@@ -101,6 +106,15 @@ module Crystring
       elsif @char == '+'
         next_char
         return Token.new(Token::PLUS, '+')
+      elsif @char == '*'
+        next_char
+        return Token.new(Token::TIMES, '*')
+      elsif @char == '/'
+        next_char
+        return Token.new(Token::DIVIDES, '/')
+      elsif @char == '%'
+        next_char
+        return Token.new(Token::MODULUS, '%')
       elsif @char == "="
         next_char
         if @char == "="
@@ -115,6 +129,12 @@ module Crystring
           return Token.new(Token::NOT_EQUALS, '!=')
         end
         raise "Invalid character `!`"
+      elsif @char == '<'
+        next_char
+        return Token.new(Token::LOWER_THAN, '<')
+      elsif @char == '>'
+        next_char
+        return Token.new(Token::GREATER_THAN, '>')
       elsif @char == '"'
         str = ""
         next_char
@@ -127,6 +147,10 @@ module Crystring
         end
         next_char
         return Token.new(Token::STRING_LITERAL, str)
+      elsif @char.nil?
+        return
+      else
+        raise "Unexpected character `#{@char}`"
       end
     end
 

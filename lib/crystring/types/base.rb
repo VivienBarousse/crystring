@@ -9,7 +9,7 @@ module Crystring
       def call_method(name, args)
         if self.class.get_method(name)
           self.class.get_method(name).invoke(args)
-        elsif self.class.base_class
+        elsif self.class.base_class && self.class.base_class.get_method(name)
           self.class.base_class.get_method(name).invoke(args)
         else
           raise "Unknown method #{name}"

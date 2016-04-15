@@ -1,0 +1,71 @@
+
+require "string";
+
+class Counter {
+
+  def <(a) {
+    if (self == a) {
+      "false";
+    } else {
+      s = Counter.new("");
+      lower_than = "false";
+      continue = "true";
+      while (continue) {
+        s = s + ".";
+        if (self + s == a) {
+          continue = "false";
+          lower_than = "true";
+        } elsif (self == a + s) {
+          continue = "false";
+          lower_than = "false";
+        }
+      }
+      lower_than;
+    }
+  }
+
+  def >(a) {
+    if (self == a) {
+      "false";
+    } elsif (self < a) {
+      "false";
+    } else {
+      "true";
+    }
+  }
+
+  def +(a) {
+    Counter.new(self.to_s() + a);
+  }
+
+  def *(a) {
+    i = "";
+    s = "";
+    while (i != a) {
+      i = i + ".";
+      s = self + s;
+    }
+    Counter.new(s);
+  }
+
+  def /(a) {
+    r = Counter.new("");
+    while ((r + ".") * a < self) {
+      r = r + ".";
+    }
+    if (self == r * (a + ".")) {
+    }
+    r;
+  }
+
+  def %(a) {
+    d = self / a;
+    m = Counter.new("");
+    while (a * d + m < self) {
+      m = m + ".";
+    }
+    m;
+  }
+
+}
+

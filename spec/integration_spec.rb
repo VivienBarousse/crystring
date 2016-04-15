@@ -204,6 +204,12 @@ describe "Feature showcases" do
     let(:expected_output) { "true\n" }
     it_should_behave_like "a correct program"
   end
+
+  describe "Counters" do
+    let(:program_name) { "counters.str" }
+    let(:expected_output) { "true\nfalse\n#{"." * 13}\n#{"." * 36}\n#{"." * 2}\n" }
+    it_should_behave_like "a correct program"
+  end
 end
 
 describe "Complete examples" do

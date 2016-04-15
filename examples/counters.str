@@ -1,0 +1,13 @@
+
+require "counter";
+
+a = Counter.new("....");
+b = Counter.new(".........");
+
+puts(a < b);
+puts(a > b);
+
+puts(a + b);
+puts(a * b);
+puts(b / a);
+
