@@ -24,6 +24,7 @@ module Crystring
       KEYWORD_ELSIF = :keyword_elsif
       KEYWORD_EXTENDS = :keyword_extends
       KEYWORD_IF = :keyword_if
+      KEYWORD_REQUIRE = :keyword_require
       KEYWORD_WHILE = :keyword_while
 
       attr_reader :type
@@ -71,6 +72,8 @@ module Crystring
           return Token.new(Token::KEYWORD_EXTENDS, identifier)
         elsif identifier == "while"
           return Token.new(Token::KEYWORD_WHILE, identifier)
+        elsif identifier == "require"
+          return Token.new(Token::KEYWORD_REQUIRE, identifier)
         end
 
         return Token.new(Token::IDENTIFIER, identifier)

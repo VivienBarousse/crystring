@@ -1,0 +1,5 @@
+
+require "string";
+
+puts("abc" != "def");
+

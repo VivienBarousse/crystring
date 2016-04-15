@@ -1,4 +1,6 @@
 
+require "string";
+
 def hello() {
   "Hello";
 }

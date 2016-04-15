@@ -1,9 +1,12 @@
 module Crystring
   class Parser
 
-    def initialize(tokenizer)
+    STDLIB_PATH = File.expand_path("../../../stdlib/", __FILE__)
+
+    def initialize(tokenizer, syntax_tree = nil)
       @tokenizer = tokenizer
-      @syntax_tree = SyntaxTree.new
+      @syntax_tree = syntax_tree || SyntaxTree.new
+      @load_path = [STDLIB_PATH, "./"]
 
       next_token
     end
@@ -21,10 +24,24 @@ module Crystring
           parse_while.invoke
         elsif @token.type == Tokenizer::Token::KEYWORD_CLASS
           parse_class
+        elsif @token.type == Tokenizer::Token::KEYWORD_REQUIRE
+          parse_require
         else
           raise "Unexpected token `#{@token.value}`"
         end
       end
+    end
+
+    def parse_require
+      assert_token(Tokenizer::Token::KEYWORD_REQUIRE)
+      file = assert_token(Tokenizer::Token::STRING_LITERAL).value
+      file += '.str' unless file =~ /\.str$/
+      assert_token(Tokenizer::Token::SEMICOLON)
+      canonical_file = @load_path.map { |f| File.expand_path(file, f) }.detect { |f| File.exists?(f) }
+      f = File.open(canonical_file)
+      tokenizer = Tokenizer.new(f)
+      parser = Parser.new(tokenizer, @syntax_tree)
+      parser.parse
     end
 
     def parse_class
@@ -108,16 +125,20 @@ module Crystring
       end
 
       return SyntaxTree::Statement.new(statements) do |statements|
+        value = "";
         statements.each do |expression, statements|
           case expression.evaluate.to_s
           when "true"
-            statements.each(&:invoke)
+            statements.each do |statement|
+              value = statement.invoke
+            end
             break
           when "false"
           else
             raise "Invalid value for boolean: `#{value_expression.evaluate}`"
           end
         end
+        value
       end
     end
 
@@ -141,7 +162,10 @@ module Crystring
 
     def parse_function
       assert_token(Tokenizer::Token::KEYWORD_DEF)
-      function_name = assert_token(Tokenizer::Token::IDENTIFIER).value
+      function_name = assert_token(
+          Tokenizer::Token::IDENTIFIER,
+          Tokenizer::Token::NOT_EQUALS,
+      ).value
       assert_token(Tokenizer::Token::OPENING_PAREN)
 
       formal_params = []
@@ -306,10 +330,10 @@ module Crystring
 
     private
 
-    def assert_token(type)
+    def assert_token(*types)
       t = @token
-      unless @token.type == type
-        raise "Invalid token type #{@token.type}, expected #{type}"
+      unless types.include?(@token.type)
+        raise "Invalid token type #{@token.type}, expected #{types.length > 1 ? "one of " : ""}#{types.join(', ')}"
       end
       next_token
       t

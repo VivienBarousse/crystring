@@ -1,0 +1,13 @@
+
+class String {
+
+  def !=(a) {
+    if (self == a) {
+      "false";
+    } else {
+      "true";
+    }
+  }
+
+}
+

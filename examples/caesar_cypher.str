@@ -1,4 +1,6 @@
 
+require "string";
+
 class String {
   def rotate(offset) {
     str = "";

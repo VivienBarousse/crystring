@@ -198,6 +198,12 @@ describe "Feature showcases" do
     let(:expected_output) { "true\nfalse\n" }
     it_should_behave_like "a correct program"
   end
+
+  describe "Require other files" do
+    let(:program_name) { "require_stdlib.str" }
+    let(:expected_output) { "true\n" }
+    it_should_behave_like "a correct program"
+  end
 end
 
 describe "Complete examples" do

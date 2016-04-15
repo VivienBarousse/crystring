@@ -1,4 +1,6 @@
 
+require "string";
+
 hello = "Hello world";
 puts(hello == "Hello world");
 puts(hello != "Hello world");
