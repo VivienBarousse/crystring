@@ -117,12 +117,12 @@ module Crystring
       Types::String.def_method("length", Function.new(
         self,
         [],
-        [Statement.new { Types::Integer.new(get_variable("self").to_s.length) }]
+        [Statement.new { Types::Counter.new("." * get_variable("self").to_s.length) }]
       ))
       Types::String.def_method("get_char", Function.new(
         self,
         ["idx"],
-        [Statement.new { Types::String.new(get_variable("self").to_s[Integer(get_variable("idx").to_s)]) }]
+        [Statement.new { Types::String.new(get_variable("self").to_s[get_variable("idx").to_s.length]) }]
       ))
       Types::String.def_method("tr", Function.new(
         self,
@@ -135,13 +135,7 @@ module Crystring
         [Statement.new { Types::String.new(get_variable("self").to_s) }]
       ))
 
-      Types::Integer.def_method("+", Function.new(
-        self,
-        ["a"],
-        [Statement.new { Types::Integer.new((Integer(get_variable("self").to_s) + Integer(get_variable("a").to_s)).to_s) }]
-      ))
-
-      set_variable("Integer", Types::Integer)
+      set_variable("Counter", Types::Counter)
       set_variable("String", Types::String)
     end
 

@@ -9,8 +9,8 @@ class Decimal {
 
   def to_counter() {
     c = Counter.new("");
-    i = Integer.new("0");
-    while (i != self.length()) {
+    i = Counter.new("");
+    while (i < self.length()) {
       c = c * "..........";
       char = self.get_char(i);
       if (char == "1") {
@@ -32,7 +32,7 @@ class Decimal {
       } elsif (char == "9") {
         c = c + ".........";
       }
-      i = i + Integer.new("1");
+      i = i + ".";
     }
     c;
   }

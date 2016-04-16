@@ -1,4 +1,6 @@
 
+require "decimal";
+
 class String {
   def hello() {
     "Hello world!".upcase();
@@ -15,6 +17,6 @@ class Hello {
 }
 
 puts(Foo.new("a").hello());
-puts(Integer.new("1").hello());
+puts(Decimal.new("1").hello());
 puts(Hello.new("a").hello());
 

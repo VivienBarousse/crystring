@@ -1,0 +1,6 @@
+
+require "decimal";
+
+a = Decimal.new("12");
+puts(a);
+

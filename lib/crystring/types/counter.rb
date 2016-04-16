@@ -1,11 +1,9 @@
 module Crystring
   module Types
-    class Integer < Base
+    class Counter < Base
 
       base_class Types::String
 
     end
   end
 end
-
-

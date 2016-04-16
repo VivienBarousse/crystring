@@ -4,7 +4,7 @@ require "string";
 class String {
   def rotate(offset) {
     str = "";
-    one = Integer.new("1");
+    one = Counter.new(".");
     i = offset;
     l = self.length();
     while (i != l) {
@@ -12,7 +12,7 @@ class String {
       str = str + c;
       i = i + one;
     }
-    i = Integer.new("0");
+    i = Counter.new("");
     while (i != offset) {
       c = self.get_char(i);
       str = str + c;
@@ -25,9 +25,9 @@ class String {
 cypher = "Uryyb Jbeyq";
 substitution = "abcdefghijklmnopqrstuvwxyz";
 
-i = Integer.new("0");
+i = Counter.new("");
 limit = substitution.length();
-one = Integer.new("1");
+one = Counter.new(".");
 while (i != limit) {
   pattern = substitution.rotate(i);
   uppercase_substitution = substitution.upcase();

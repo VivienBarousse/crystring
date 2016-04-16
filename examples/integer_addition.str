@@ -1,6 +1,0 @@
-
-a = Integer.new("5");
-b = Integer.new("13");
-
-puts(a + b);
-

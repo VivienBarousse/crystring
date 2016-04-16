@@ -126,18 +126,6 @@ describe "Feature showcases" do
     it_should_behave_like "a correct program"
   end
 
-  describe "Integer as a type" do
-    let(:program_name) { "integer_type.str" }
-    let(:expected_output) { "12\n" }
-    it_should_behave_like "a correct program"
-  end
-
-  describe "Integer addition" do
-    let(:program_name) { "integer_addition.str" }
-    let(:expected_output) { "18\n" }
-    it_should_behave_like "a correct program"
-  end
-
   describe "Read from stdin (gets)" do
     let(:program_name) { "read_from_stdin.str" }
     let(:given_input) { "first line\nsecond line\n" }
@@ -208,6 +196,12 @@ describe "Feature showcases" do
   describe "Counters" do
     let(:program_name) { "counters.str" }
     let(:expected_output) { "true\nfalse\n#{"." * 13}\n#{"." * 36}\n#{"." * 2}\n" }
+    it_should_behave_like "a correct program"
+  end
+
+  describe "Decimal as a type" do
+    let(:program_name) { "decimal_type.str" }
+    let(:expected_output) { "12\n" }
     it_should_behave_like "a correct program"
   end
 

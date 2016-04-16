@@ -1,3 +1,5 @@
 
-puts("HELLO WORLD".length());
+require "decimal";
+
+puts("HELLO WORLD".length().to_decimal());
 
