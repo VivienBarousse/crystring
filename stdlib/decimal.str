@@ -1,0 +1,77 @@
+
+require "counter";
+
+class Decimal {
+  def +(a) {
+    sum = self.to_counter() + a.to_counter();
+    sum.to_decimal();
+  }
+
+  def to_counter() {
+    c = Counter.new("");
+    i = Integer.new("0");
+    while (i != self.length()) {
+      c = c * "..........";
+      char = self.get_char(i);
+      if (char == "1") {
+        c = c + ".";
+      } elsif (char == "2") {
+        c = c + "..";
+      } elsif (char == "3") {
+        c = c + "...";
+      } elsif (char == "4") {
+        c = c + "....";
+      } elsif (char == "5") {
+        c = c + ".....";
+      } elsif (char == "6") {
+        c = c + "......";
+      } elsif (char == "7") {
+        c = c + ".......";
+      } elsif (char == "8") {
+        c = c + "........";
+      } elsif (char == "9") {
+        c = c + ".........";
+      }
+      i = i + Integer.new("1");
+    }
+    c;
+  }
+}
+
+class Counter {
+  def to_decimal() {
+    ten = Counter.new("..........");
+    decimal = "";
+    total = self;
+    while (total != "") {
+      mod = total % ten;
+      if (mod == ".") {
+        mod_str = "1";
+      } elsif (mod == "..") {
+        mod_str = "2";
+      } elsif (mod == "...") {
+        mod_str = "3";
+      } elsif (mod == "....") {
+        mod_str = "4";
+      } elsif (mod == ".....") {
+        mod_str = "5";
+      } elsif (mod == "......") {
+        mod_str = "6";
+      } elsif (mod == ".......") {
+        mod_str = "7";
+      } elsif (mod == "........") {
+        mod_str = "8";
+      } elsif (mod == ".........") {
+        mod_str = "9";
+      }
+      decimal = mod_str + decimal;
+      total = total / ten;
+    }
+    if (self == "") {
+      "0";
+    } else {
+      decimal;
+    }
+  }
+}
+

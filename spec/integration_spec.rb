@@ -210,6 +210,12 @@ describe "Feature showcases" do
     let(:expected_output) { "true\nfalse\n#{"." * 13}\n#{"." * 36}\n#{"." * 2}\n" }
     it_should_behave_like "a correct program"
   end
+
+  describe "Decimal addition" do
+    let(:program_name) { "decimal_addition.str" }
+    let(:expected_output) { "18\n71\n0\n" }
+    it_should_behave_like "a correct program"
+  end
 end
 
 describe "Complete examples" do

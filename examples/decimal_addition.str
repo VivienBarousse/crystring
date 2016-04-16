@@ -1,0 +1,11 @@
+
+require "counter";
+require "decimal";
+
+a = Decimal.new("5");
+b = Decimal.new("13");
+puts(a + b);
+
+puts(Decimal.new("12") + Decimal.new("59"));
+puts(Decimal.new("0") + Decimal.new("0"));
+
