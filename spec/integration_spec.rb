@@ -210,6 +210,12 @@ describe "Feature showcases" do
     let(:expected_output) { "18\n71\n0\n" }
     it_should_behave_like "a correct program"
   end
+
+  describe "Counters substraction" do
+    let(:program_name) { "counters_substraction.str" }
+    let(:expected_output) { "\n.....\n" }
+    it_should_behave_like "a correct program"
+  end
 end
 
 describe "Complete examples" do

@@ -38,6 +38,23 @@ class Counter {
     Counter.new(self.to_s() + a);
   }
 
+  def -(a) {
+    i = Counter.new("");
+    s = "";
+    continue = "true";
+    while (continue) {
+      if (self + i == a) {
+        continue = "false";
+      }
+      if (a + i == self) {
+        continue = "false";
+        s = i;
+      }
+      i = i + ".";
+    }
+    s;
+  }
+
   def *(a) {
     i = "";
     s = "";

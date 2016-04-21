@@ -166,6 +166,7 @@ module Crystring
           Tokenizer::Token::IDENTIFIER,
           Tokenizer::Token::TIMES,
           Tokenizer::Token::PLUS,
+          Tokenizer::Token::MINUS,
           Tokenizer::Token::DIVIDES,
           Tokenizer::Token::MODULUS,
           Tokenizer::Token::LOWER_THAN,
@@ -291,6 +292,17 @@ module Crystring
           args = [rhs.evaluate]
           @syntax_tree.with_lookup_scope(value) do
             value.call_method("+", args)
+          end
+        end
+      elsif @token.type == Tokenizer::Token::MINUS
+        assert_token(Tokenizer::Token::MINUS)
+
+        rhs = parse_addition
+        SyntaxTree::Expression.new do
+          value = lhs.evaluate
+          args = [rhs.evaluate]
+          @syntax_tree.with_lookup_scope(value) do
+            value.call_method("-", args)
           end
         end
       else

@@ -20,6 +20,7 @@ module Crystring
       COMMA = :comma
       PERIOD = :period
       PLUS = :plus
+      MINUS = :minus
       TIMES = :times
       DIVIDES = :divides
       MODULUS = :modulus
@@ -106,6 +107,9 @@ module Crystring
       elsif @char == '+'
         next_char
         return Token.new(Token::PLUS, '+')
+      elsif @char == '-'
+        next_char
+        return Token.new(Token::MINUS, '-')
       elsif @char == '*'
         next_char
         return Token.new(Token::TIMES, '*')
