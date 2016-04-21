@@ -40,7 +40,7 @@ class Counter {
 
   def -(a) {
     i = Counter.new("");
-    s = "";
+    s = Counter.new("");
     continue = "true";
     while (continue) {
       if (self + i == a) {

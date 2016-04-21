@@ -1,0 +1,13 @@
+
+require "counter";
+require "decimal";
+
+a = Decimal.new("5");
+b = Decimal.new("13");
+puts(b - a);
+
+puts(Decimal.new("59") - Decimal.new("12"));
+puts(Decimal.new("1") + Decimal.new("0"));
+puts(Decimal.new("12") - Decimal.new("59"));
+
+

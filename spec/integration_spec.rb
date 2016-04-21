@@ -216,6 +216,12 @@ describe "Feature showcases" do
     let(:expected_output) { "\n.....\n" }
     it_should_behave_like "a correct program"
   end
+
+  describe "Decimal substraction" do
+    let(:program_name) { "decimal_substraction.str" }
+    let(:expected_output) { "8\n47\n1\n0\n" }
+    it_should_behave_like "a correct program"
+  end
 end
 
 describe "Complete examples" do

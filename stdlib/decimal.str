@@ -7,6 +7,11 @@ class Decimal {
     sum.to_decimal();
   }
 
+  def -(a) {
+    difference = self.to_counter() - a.to_counter();
+    difference.to_decimal();
+  }
+
   def to_counter() {
     c = Counter.new("");
     i = Counter.new("");
