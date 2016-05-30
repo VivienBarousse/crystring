@@ -222,6 +222,12 @@ describe "Feature showcases" do
     let(:expected_output) { "8\n47\n1\n0\n" }
     it_should_behave_like "a correct program"
   end
+
+  describe "Code blocks" do
+    let(:program_name) { "code_blocks.str" }
+    let(:expected_output) { "Hello\nThere\nWorld\n" }
+    it_should_behave_like "a correct program"
+  end
 end
 
 describe "Complete examples" do

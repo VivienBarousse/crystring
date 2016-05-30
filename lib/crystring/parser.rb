@@ -383,8 +383,12 @@ module Crystring
 
         assert_token(Tokenizer::Token::CLOSING_PAREN)
 
+        code_block = if @token.type == Tokenizer::Token::OPENING_CURLY
+          parse_statements_block
+        end
+
         expression = SyntaxTree::Expression.new do
-          @syntax_tree.call_function(value_token.value, value_expressions)
+          @syntax_tree.call_function(value_token.value, value_expressions, code_block)
         end
       end
 
@@ -405,11 +409,15 @@ module Crystring
 
           assert_token(Tokenizer::Token::CLOSING_PAREN)
 
-          expression = SyntaxTree::Expression.new(function_name, expression, value_expressions) do |f, target, value_expressions|
+          code_block = if @token.type == Tokenizer::Token::OPENING_CURLY
+            parse_statements_block
+          end
+
+          expression = SyntaxTree::Expression.new(function_name, expression, value_expressions, code_block) do |f, target, value_expressions, code_block|
             value = target.evaluate
             arguments = value_expressions.map(&:evaluate)
             @syntax_tree.with_lookup_scope(value) do
-              value.call_method(f, arguments)
+              value.call_method(f, arguments, code_block)
             end
           end
         end

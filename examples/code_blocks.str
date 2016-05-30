@@ -1,0 +1,11 @@
+
+def foo() {
+  puts("Hello");
+  yield();
+  puts("World");
+}
+
+foo() {
+  puts("There");
+};
+

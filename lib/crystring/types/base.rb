@@ -6,17 +6,17 @@ module Crystring
         @variables = {}
       end
 
-      def call_method(name, args)
+      def call_method(name, args, code_block = nil)
         if self.class.get_method(name)
-          self.class.get_method(name).invoke(args)
+          self.class.get_method(name).invoke(args, code_block)
         elsif self.class.base_class && self.class.base_class.get_method(name)
-          self.class.base_class.get_method(name).invoke(args)
+          self.class.base_class.get_method(name).invoke(args, code_block)
         else
           raise "Unknown method #{name}"
         end
       end
 
-      def self.call_method(name, args)
+      def self.call_method(name, args, code_block = nil)
         raise "Unknown method #{name}" unless name == "new"
         raise "Invalid number of arguments #{args.count}, expected 1" unless args.count == 1
         new(args.first.to_s)

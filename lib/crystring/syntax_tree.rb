@@ -17,6 +17,10 @@ module Crystring
       def set_variable(name, value)
         @variables[name] = value
       end
+
+      def get_code_block
+        nil
+      end
     end
 
     class Statement
@@ -49,13 +53,14 @@ module Crystring
         @variables = {}
       end
 
-      def invoke(actual_params)
+      def invoke(actual_params, code_block)
         unless @formal_params.length == actual_params.length
           raise "Invalid cardinality for function: expected #{@formal_params.length} arguments, got #{actual_params.length}"
         end
         @formal_params.length.times do |i|
           @variables[@formal_params[i]] = actual_params[i]
         end
+        @code_block = code_block
         @syntax_tree.with_lookup_scope(self) do
           value = nil
           @statements.each do |s|
@@ -76,6 +81,10 @@ module Crystring
       def set_variable(name, value)
         @variables[name] = value
       end
+
+      def get_code_block
+        @code_block
+      end
     end
 
     def initialize
@@ -92,6 +101,11 @@ module Crystring
         self,
         [],
         [Statement.new { Types::String.new(STDIN.readline.gsub(/\n$/, '')) }]
+      )
+      @functions["yield"] = Function.new(
+        self,
+        [],
+        [Statement.new { v = nil; get_code_block.each { |s| v = s.invoke }; v }]
       )
 
       Types::String.def_method("+", Function.new(
@@ -158,10 +172,10 @@ module Crystring
       @functions[expression_name] = statements
     end
 
-    def call_function(expression_name, value_expressions)
+    def call_function(expression_name, value_expressions, code_block)
       if @functions.has_key?(expression_name)
         params = value_expressions.map(&:evaluate)
-        @functions[expression_name].invoke(params)
+        @functions[expression_name].invoke(params, code_block)
       else
         raise "Unknown function #{expression_name}"
       end
@@ -178,6 +192,11 @@ module Crystring
 
     def set_variable(name, value)
       @lookup_scopes.last.set_variable(name, value)
+    end
+
+    def get_code_block
+      scope = @lookup_scopes.reverse.detect { |s| s.get_code_block }
+      scope.get_code_block
     end
   end
 end
