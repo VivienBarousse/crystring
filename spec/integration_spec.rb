@@ -228,6 +228,12 @@ describe "Feature showcases" do
     let(:expected_output) { "Hello\nThere\nWorld\n" }
     it_should_behave_like "a correct program"
   end
+
+  describe "Print function" do
+    let(:program_name) { "print.str" }
+    let(:expected_output) { "Hello world!\n" }
+    it_should_behave_like "a correct program"
+  end
 end
 
 describe "Complete examples" do

@@ -97,6 +97,105 @@ module Crystring
         ["value"],
         [Statement.new { puts get_variable("value") }]
       )
+      @functions["print"] = Function.new(
+        self,
+        ["value"],
+        [Statement.new { print get_variable("value") }]
+      )
+      @functions["gets"] = Function.new(
+        self,
+        [],
+        [Statement.new { Types::String.new(STDIN.readline.gsub(/\n$/, '')) }]
+      )
+      @functions["yield"] = Function.new(
+        self,
+        [],
+        [Statement.new { v = nil; get_code_block.each { |s| v = s.invoke }; v }]
+      )
+
+      Types::String.def_method("+", Function.new(
+        self,
+        ["a"],
+        [Statement.new { Types::String.new(get_variable("self").to_s + get_variable("a").to_s) }]
+      ))
+      Types::String.def_method("==", Function.new(
+        self,
+        ["a"],
+        [Statement.new { Types::String.new(get_variable("self").to_s == get_variable("a").to_s ? "true" : "false") }]
+      ))
+      Types::String.def_method("upcase", Function.new(
+        self,
+        [],
+        [Statement.new { Types::String.new(get_variable("self").to_s.upcase) }]
+      ))
+      Types::String.def_method("downcase", Function.new(
+        self,
+        [],
+        [Statement.new { Types::String.new(get_variable("self").to_s.downcase) }]
+      ))
+      Types::String.def_method("length", Function.new(
+        self,
+        [],
+        [Statement.new { Types::Counter.new("." * get_variable("self").to_s.length) }]
+      ))
+      Types::String.def_method("get_char", Function.new(
+        self,
+        ["idx"],
+        [Statement.new { Types::String.new(get_variable("self").to_s[get_variable("idx").to_s.length]) }]
+      ))
+      Types::String.def_method("tr", Function.new(
+        self,
+        ["sub", "ptn"],
+        [Statement.new { Types::String.new(get_variable("self").to_s.tr(get_variable("sub").to_s, get_variable("ptn").to_s)) }]
+      ))
+      Types::String.def_method("to_s", Function.new(
+        self,
+        [],
+        [Statement.new { Types::String.new(get_variable("self").to_s) }]
+      ))
+
+      set_variable("Counter", Types::Counter)
+      set_variable("String", Types::String)
+    end
+
+    def lookup_type(type_name)
+      type = get_variable(type_name)
+      unless type.is_a?(Class) && type <= Types::Base
+        raise "Unexpected base type `#{type_name}`, is a variable, not a type."
+      end
+      type
+    end
+
+    def with_lookup_scope(scope)
+      @lookup_scopes << scope
+      result = yield
+      @lookup_scopes.pop
+      result
+    end
+
+    def set_function(expression_name, statements)
+      @functions[expression_name] = statements
+    end
+
+    def call_function(expression_name, value_expressions, code_block)
+      if @functions.has_key?(expression_name)
+        params = value_expressions.map(&:evaluate)
+        @functions[expression_name].invoke(params, code_block)
+      else
+        raise "Unknown function #{expression_name}"
+      end
+    end
+
+    def variable_exists?(name)
+      @lookup_scopes.any? { |s| s.variable_exists?(name) }
+    end
+
+    def get_variable(name)
+      scope = @lookup_scopes.reverse.detect { |s| s.variable_exists?(name) }
+      scope.get_variable(name)
+    end
+
+    def set_variable(name, value)
       @functions["gets"] = Function.new(
         self,
         [],
