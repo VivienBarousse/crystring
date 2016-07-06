@@ -1,0 +1,39 @@
+
+require "test";
+
+require "counter";
+
+describe("Counter::<") {
+  it("Returns true when self is smaller than `a`") {
+    actual = Counter.new(".") < Counter.new("..");
+    assertEquals(actual, "true");
+  };
+
+  it("Returns false when self is larger than `a`") {
+    actual = Counter.new("...") < Counter.new("..");
+    assertEquals(actual, "false");
+  };
+
+  it("Returns false when self is equals to `a`") {
+    actual = Counter.new("..") < Counter.new("..");
+    assertEquals(actual, "false");
+  };
+};
+
+describe("Counter::>") {
+  it("Returns true when self is larger than `a`") {
+    actual = Counter.new("..") > Counter.new(".");
+    assertEquals(actual, "true");
+  };
+
+  it("Returns false when self is smaller than `a`") {
+    actual = Counter.new("..") > Counter.new("...");
+    assertEquals(actual, "false");
+  };
+
+  it("Returns false when self is equals to `a`") {
+    actual = Counter.new("..") > Counter.new("..");
+    assertEquals(actual, "false");
+  };
+};
+
