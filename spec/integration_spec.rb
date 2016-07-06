@@ -234,6 +234,11 @@ describe "Feature showcases" do
     let(:expected_output) { "Hello world!\n" }
     it_should_behave_like "a correct program"
   end
+
+  describe "Basic unit tests" do
+    let(:program_name) { "unit_test.str" }
+    let(:expected_output) { "Unit test example:\n.F\n" }
+  end
 end
 
 describe "Complete examples" do
