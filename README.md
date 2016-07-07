@@ -1,7 +1,7 @@
 crystring
 =========
 
-One programming language to rull the mall.
+One programming language to rule the mall.
 
 This is an (experimental) programming language, where everythig is a string.
 This means String is the base class of any other class. Decimals are strings.
