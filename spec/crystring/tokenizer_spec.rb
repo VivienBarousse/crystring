@@ -47,5 +47,25 @@ describe Crystring::Tokenizer do
       end
     end
   end
+
+  describe "line comments" do
+    let(:code) { "abc #this comment\ncde" }
+
+    it "should ignore the comment" do
+      expect(subject.next_token).to eq(Crystring::Tokenizer::Token.new(Crystring::Tokenizer::Token::IDENTIFIER, "abc"))
+      expect(subject.next_token).to eq(Crystring::Tokenizer::Token.new(Crystring::Tokenizer::Token::IDENTIFIER, "cde"))
+      expect(subject.next_token).to be_nil
+    end
+
+    describe "comment on last line" do
+      let(:code) { "abc cde\n#this comment" }
+
+      it "should ignore the comment" do
+        expect(subject.next_token).to eq(Crystring::Tokenizer::Token.new(Crystring::Tokenizer::Token::IDENTIFIER, "abc"))
+        expect(subject.next_token).to eq(Crystring::Tokenizer::Token.new(Crystring::Tokenizer::Token::IDENTIFIER, "cde"))
+        expect(subject.next_token).to be_nil
+      end
+    end
+  end
 end
 

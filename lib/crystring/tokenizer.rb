@@ -151,6 +151,11 @@ module Crystring
         end
         next_char
         return Token.new(Token::STRING_LITERAL, str)
+      elsif @char == "#"
+        while @char && @char != "\n"
+          next_char
+        end
+        next_token
       elsif @char.nil?
         return
       else
