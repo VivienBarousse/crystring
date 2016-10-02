@@ -9,5 +9,14 @@ class String {
     }
   }
 
+  def substring(start, end) {
+    out = "";
+    while (start < end) {
+      out = out + self.get_char(start);
+      start = start + Counter.new(".");
+    }
+    out;
+  }
+
 }
 

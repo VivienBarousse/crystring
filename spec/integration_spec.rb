@@ -169,6 +169,12 @@ describe "Feature showcases" do
     it_should_behave_like "a correct program"
   end
 
+  describe "String substring" do
+    let(:program_name) { "string_substring.str" }
+    let(:expected_output) { "abcdef\ncdef\ncd\n\n" }
+    it_should_behave_like "a correct program"
+  end
+
   describe "Chained additions" do
     let(:program_name) { "multiple_addition.str" }
     let(:expected_output) { "Hello\n" }

@@ -1,0 +1,9 @@
+
+require "counter";
+require "string";
+
+puts("abcdef".substring(Counter.new(""), "abcdef".length()));
+puts("abcdef".substring(Counter.new(".."), "abcdef".length()));
+puts("abcdef".substring(Counter.new(".."), Counter.new("....")));
+puts("abcdef".substring(Counter.new("...."), Counter.new("..")));
+
