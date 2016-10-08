@@ -1,0 +1,16 @@
+
+require "counter";
+require "decimal";
+
+puts(Decimal.new("7") + Decimal.new("12"));
+puts(Decimal.new("-12") + Decimal.new("5"));
+puts(Decimal.new("-5") + Decimal.new("12"));
+puts(Decimal.new("-7") + Decimal.new("-12"));
+puts(Decimal.new("7") + Decimal.new("-12"));
+puts(Decimal.new("12") + Decimal.new("-7"));
+puts(Decimal.new("7") - Decimal.new("12"));
+puts(Decimal.new("-12") - Decimal.new("5"));
+puts(Decimal.new("-7") - Decimal.new("-12"));
+puts(Decimal.new("7") - Decimal.new("-12"));
+puts(Decimal.new("-12").to_counter());
+

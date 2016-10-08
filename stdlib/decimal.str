@@ -3,13 +3,43 @@ require "counter";
 
 class Decimal {
   def +(a) {
-    sum = self.to_counter() + a.to_counter();
-    sum.to_decimal();
+    first = Counter.new("");
+
+    if (self.get_char(first) == "-") {
+      if (a.get_char(first) == "-") {
+        sum = self.to_counter() + a.to_counter();
+        Decimal.new("-" + sum.to_decimal());
+      } else {
+        selfc = self.to_counter();
+        ac = a.to_counter();
+        if (ac < selfc) {
+          Decimal.new("-" + (selfc - ac).to_decimal());
+        } else {
+          (ac - selfc).to_decimal();
+        }
+      }
+    } else {
+      if (a.get_char(first) == "-") {
+        selfc = self.to_counter();
+        ac = a.to_counter();
+        if (selfc < ac) {
+          Decimal.new("-" + (ac - selfc).to_decimal());
+        } else {
+          (selfc - ac).to_decimal();
+        }
+      } else {
+        sum = self.to_counter() + a.to_counter();
+        sum.to_decimal();
+      }
+    }
   }
 
   def -(a) {
-    difference = self.to_counter() - a.to_counter();
-    difference.to_decimal();
+    if (a.get_char(Counter.new("")) == "-") {
+      self + Decimal.new(a.to_s().substring(Counter.new("."), a.length()));
+    } else {
+      self + Decimal.new("-" + a);
+    }
   }
 
   def to_counter() {

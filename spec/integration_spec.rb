@@ -225,7 +225,13 @@ describe "Feature showcases" do
 
   describe "Decimal substraction" do
     let(:program_name) { "decimal_substraction.str" }
-    let(:expected_output) { "8\n47\n1\n0\n" }
+    let(:expected_output) { "8\n47\n1\n-47\n" }
+    it_should_behave_like "a correct program"
+  end
+
+  describe "Negative decimals" do
+    let(:program_name) { "decimal_negatives.str" }
+    let(:expected_output) { "19\n-7\n7\n-19\n-5\n5\n-5\n-17\n5\n19\n............\n" }
     it_should_behave_like "a correct program"
   end
 
