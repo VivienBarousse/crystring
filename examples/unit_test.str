@@ -1,0 +1,13 @@
+
+require "test";
+
+describe("Unit test example") {
+  it("is a passing unit test") {
+    assertEquals("Hello world!", "Hello world!");
+  };
+
+  it("is a failing unit test") {
+    assertEquals("Hello world!", "Helloworld!");
+  };
+};
+

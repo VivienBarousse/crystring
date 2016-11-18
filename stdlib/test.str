@@ -1,0 +1,21 @@
+
+def describe(description) {
+  puts(description + ":");
+  yield();
+  puts("");
+}
+
+def it(description) {
+  testPassing = yield();
+
+  if (testPassing) {
+    print(".");
+  } else {
+    print("F");
+  }
+}
+
+def assertEquals(expected, actual) {
+  expected == actual;
+}
+
